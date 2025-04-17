@@ -501,9 +501,9 @@ var flip = localStorage.getItem("isDarkMode");
 toggleDark.addEventListener("click", function () {
   console.log(flip);
   if (localStorage.getItem("isDarkMode") === "true") {
-    toggleDark.src = chrome.runtime.getURL("./sun-solid.svg");
+    toggleDark.src = chrome.runtime.getURL("./images/sun-solid.svg");
   } else {
-    toggleDark.src = chrome.runtime.getURL("./moon-solid.svg");
+    toggleDark.src = chrome.runtime.getURL("./images/moon-solid.svg");
   }
   document.body.classList.toggle("dark-mode");
   const copyUser = document.querySelector("#copyButton");
@@ -521,12 +521,12 @@ const quickCallButtons = document.querySelectorAll("#myButton2");
 document.addEventListener("DOMContentLoaded", function () {
   const savedTheme = localStorage.getItem("isDarkMode");
   if (savedTheme === "true") {
-    toggleDark.src = chrome.runtime.getURL("./moon-solid.svg");
+    toggleDark.src = chrome.runtime.getURL("./images/moon-solid.svg");
     document.body.classList.add("dark-mode");
     quickCallButtons.forEach((button) => {
       button.classList.add("dark-mode");
     });
   } else {
-    toggleDark.src = chrome.runtime.getURL("./sun-solid.svg");
+    toggleDark.src = chrome.runtime.getURL("./images/sun-solid.svg");
   }
 });

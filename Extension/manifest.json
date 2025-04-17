@@ -5,7 +5,7 @@
   "permissions": ["activeTab", "offscreen"],
 
   "action": {
-    "default_icon": "favicon.png",
+    "default_icon": "images/favicon.png",
     "default_popup": "popup.html",
     "css": ["./styles.css"]
   },
