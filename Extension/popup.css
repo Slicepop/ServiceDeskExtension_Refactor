@@ -1,0 +1,100 @@
+html {
+  border-radius: 25px;
+  width: 376px;
+  height: 100px;
+}
+
+body {
+  background-color: white;
+  color: black;
+  margin: 50px;
+}
+
+/* Dark Mode */
+body.dark-mode {
+  background-color: #3d3d3d;
+
+  color: white;
+}
+
+button.dark-mode {
+  background: #3d3d3d;
+  color: whitesmoke;
+  border-radius: 4px;
+}
+
+#theme-toggle {
+  cursor: pointer;
+  float: right;
+  width: auto;
+  margin: 15px;
+  height: 30px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.dark-mode input {
+  background-color: #3d3d3d;
+  color: white;
+}
+
+.dark-mode ::placeholder {
+  color: #f5f5f5b7;
+}
+
+#subject {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+input {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#lines {
+  max-width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#buttons {
+  margin-left: auto;
+  margin-right: auto;
+  padding-bottom: 50px;
+  max-width: fit-content;
+}
+#subjectLine {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+#err {
+  color: rgb(248, 73, 73);
+  position: absolute;
+  margin-left: -18px;
+  max-width: fit-content;
+  top: 82%;
+}
+#copyButton {
+  cursor: pointer;
+  margin-left: 10px;
+  margin-bottom: -5px;
+  height: 20px;
+}
+#searchAndCopy {
+  align-items: center;
+}
+
+.result {
+  cursor: pointer;
+  margin-bottom: -5px;
+}
+.result:hover {
+  outline-style: solid;
+  outline-width: 0.5px;
+}
+.result.highlight {
+  outline-style: solid;
+  outline-width: 0.5px;
+}
