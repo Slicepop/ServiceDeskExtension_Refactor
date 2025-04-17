@@ -6,7 +6,7 @@
 
   "action": {
     "default_icon": "images/favicon.png",
-    "default_popup": "popup.html",
+    "default_popup": "popup/popup.html",
     "css": ["./styles.css"]
   },
 
