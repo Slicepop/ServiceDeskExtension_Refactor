@@ -6,7 +6,11 @@
   outline-style: solid;
   outline-width: 0.25px;
   border-radius: 5px;
-  margin-left: 10px;
+  margin-left: 5px;
   line-height: 1.02;
+  scale: 0.78;
+  transition: all 0.25s;
+}
+#Save_Close:hover {
   scale: 0.8;
 }

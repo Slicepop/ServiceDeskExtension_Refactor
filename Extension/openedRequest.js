@@ -18,15 +18,20 @@ function addSaveCloseBTN() {
   if (document.querySelector("#Save_Close")) {
     return;
   }
-  const test = document.createElement("p");
-  test.id = "Save_Close";
-  test.textContent = "SAVE\n+\nCLOSE";
-  test.title = "Saves Ticket and Closes Window";
+  const SaveClose = document.createElement("p");
+  SaveClose.id = "Save_Close";
+  SaveClose.textContent = "SAVE\n+\nCLOSE";
+  SaveClose.title = "Saves Ticket and Closes Window";
+  SaveClose.addEventListener("click", () => {
+    setTimeout(() => {
+      window.close();
+    }, 800);
+  });
   document
     .querySelector(
       "#request_general_container > div > div.card-header.general-card-header > button"
     )
-    .appendChild(test);
+    .appendChild(SaveClose);
 }
 async function fetchTitle() {
   const itemID = window.location.href.split("requestId=")[1];
