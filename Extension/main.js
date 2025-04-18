@@ -1,6 +1,17 @@
 if (window.location.href.includes("LookupRequest?")) {
   runRequestTab();
 }
+const incident = document.querySelector(
+  ".rowoverride > div.mb-3.col-10 > ul > li:nth-child(2)"
+);
+if (incident) {
+  const incidentNum = incident.querySelector("sup");
+  setTimeout(() => {
+    if (incidentNum && incidentNum.textContent !== "0") {
+      incident.click();
+    }
+  }, 1);
+}
 
 function replaceLinks() {
   const linksToRequest = document.querySelectorAll("#requestId");
@@ -13,6 +24,7 @@ function replaceLinks() {
     link.parentNode.replaceChild(newLink, link);
   });
 }
+
 let debounceTimeout;
 const observer = new MutationObserver(() => {
   clearTimeout(debounceTimeout);
