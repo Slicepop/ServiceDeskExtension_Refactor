@@ -14,3 +14,15 @@
 #Save_Close:hover {
   scale: 0.8;
 }
+#newI_Tag {
+  cursor: pointer;
+  pointer-events: all;
+  margin-top: 40px;
+  margin-left: 10px;
+}
+#tooltip_info.tooltipShown {
+  display: block;
+}
+#tooltip_info > span > label {
+  cursor: text;
+}

@@ -17,6 +17,7 @@ if (window.location.href.includes("LookupRequest?")) {
 
   function replaceLinks() {
     const linksToRequest = document.querySelectorAll("#requestId");
+    if (!linksToRequest) return;
     linksToRequest.forEach((link) => {
       const newLink = document.createElement("a");
       newLink.textContent = link.textContent.trim();
