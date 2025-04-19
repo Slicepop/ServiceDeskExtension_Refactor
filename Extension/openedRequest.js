@@ -58,7 +58,7 @@ function changeUserTooltip() {
     "#request-general-detail > div > div:nth-child(2) > div:nth-child(1) > div > div > div > div:nth-child(1) > em"
   );
   if (!userI_Tag) return;
-  const newI_Tag = document.createElement("i");
+  const newI_Tag = document.createElement("em");
   newI_Tag.id = "newI_Tag";
   newI_Tag.style.cssText = userI_Tag.style.cssText;
   newI_Tag.classList.add(...userI_Tag.classList);

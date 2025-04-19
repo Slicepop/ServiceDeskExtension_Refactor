@@ -19,7 +19,7 @@
   "content_scripts": [
     {
       "matches": ["https://support.wmed.edu/LiveTime/WebObjects/*"],
-      "js": ["openedRequest.js", "main.js"],
+      "js": ["functions.js", "openedRequest.js", "main.js"],
       "css": ["styles.css"],
       "type": "module",
       "run_at": "document_idle"
