@@ -30,7 +30,7 @@ function navigateToDefaultReport() {
   const technicianReports = document.querySelector(
     "#submenu > li:nth-child(5) > a"
   );
-  window.location.replace(technicianReports.href);
+  window.location.href = technicianReports.href;
 }
 function selectDefaultReport() {
   const changeEvent = new Event("change");
@@ -93,7 +93,7 @@ function clickReportBTN() {
   );
   if (!reportsBTN) return;
   const reportsURL = reportsBTN.href;
-  window.location.replace(reportsURL);
+  window.location.href = reportsURL;
 }
 
 function replaceLinks() {
