@@ -2,7 +2,7 @@ function assignMacroReportValue() {
   chrome.storage.local.get("macroReport", (response) => {
     if (typeof response.macroReport === "undefined") {
       chrome.storage.local.set({ macroReport: false }, assignMacroReportValue);
-      assignMacroReportValue();
+      return;
     }
 
     const MacroOn = response.macroReport === true;
@@ -38,18 +38,18 @@ function selectDefaultReport() {
     "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(1) > td.fieldtext > select"
   );
   if (!reportSelection) return;
-  else if (reportSelection.selectedIndex == "10") {
-    selectBoundsOfCurrWeek();
+  if (reportSelection.value !== "10") {
+    reportSelection.value = "10";
+    reportSelection.dispatchEvent(changeEvent);
     return;
   }
-  reportSelection.selectedIndex = "10";
-  reportSelection.dispatchEvent(changeEvent);
+  selectBoundsOfCurrWeek();
 }
 function addCheckboxForMacro() {
   const areaToAddCheck = document.querySelector(
     "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(4) > td.fieldtext"
   );
-  if (!areaToAddCheck) return;
+  if (!areaToAddCheck || document.querySelector("#macroCheckbox")) return;
   const macroCheckbox = document.createElement("input");
   macroCheckbox.id = "macroCheckbox";
   macroCheckbox.type = "checkbox";
@@ -61,19 +61,19 @@ function addCheckboxForMacro() {
     chrome.storage.local.set({ macroReport: macroCheckbox.checked });
   });
 }
+function getDaysOfCurrentWeek() {
+  const Monday = new Date();
+  const dayOfWeek = Monday.getDay(); // Sunday = 0, Monday = 1, etc.
+  const distanceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // If Sunday (0), move back 6 days, otherwise move back `dayOfWeek - 1`
+
+  Monday.setDate(Monday.getDate() - distanceToMonday);
+  Monday.setHours(0, 0, 0, 0); // Set time to the start of the day
+
+  const Friday = new Date();
+  Friday.setDate(Monday.getDate() + 4); // grab Friday which would be 4 days after Monday
+  return { Monday: Monday, Friday: Friday };
+}
 function selectBoundsOfCurrWeek() {
-  function getDaysOfCurrentWeek() {
-    const Monday = new Date();
-    const dayOfWeek = Monday.getDay(); // Sunday = 0, Monday = 1, etc.
-    const distanceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // If Sunday (0), move back 6 days, otherwise move back `dayOfWeek - 1`
-
-    Monday.setDate(Monday.getDate() - distanceToMonday);
-    Monday.setHours(0, 0, 0, 0); // Set time to the start of the day
-
-    const Friday = new Date();
-    Friday.setDate(Monday.getDate() + 4);
-    return { Monday: Monday, Friday: Friday };
-  }
   const days = getDaysOfCurrentWeek();
   const Monday = days.Monday;
   const formattedDate = Monday.toLocaleDateString("en-GB").replace(
