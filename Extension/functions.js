@@ -62,29 +62,26 @@ function addCheckboxForMacro() {
   });
 }
 function selectBoundsOfCurrWeek() {
-  function getMondayOfCurrentWeek() {
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // Sunday = 0, Monday = 1, etc.
+  function getDaysOfCurrentWeek() {
+    const Monday = new Date();
+    const dayOfWeek = Monday.getDay(); // Sunday = 0, Monday = 1, etc.
     const distanceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // If Sunday (0), move back 6 days, otherwise move back `dayOfWeek - 1`
 
-    today.setDate(today.getDate() - distanceToMonday);
-    today.setHours(0, 0, 0, 0); // Set time to the start of the day
-    return today;
-  }
-  function getFridayOfCurrentWeek() {
-    const Monday = getMondayOfCurrentWeek();
-    const Friday = new Date(Monday);
+    Monday.setDate(Monday.getDate() - distanceToMonday);
+    Monday.setHours(0, 0, 0, 0); // Set time to the start of the day
+
+    const Friday = new Date();
     Friday.setDate(Monday.getDate() + 4);
-    return Friday;
+    return { Monday: Monday, Friday: Friday };
   }
-  console.log("SD");
-  const Monday = getMondayOfCurrentWeek();
+  const days = getDaysOfCurrentWeek();
+  const Monday = days.Monday;
   const formattedDate = Monday.toLocaleDateString("en-GB").replace(
     /(\d{2})\/(\d{2})\/(\d{4})/,
     "$2/$1/$3"
   );
   document.querySelector("#startDateUserTZ").value = formattedDate;
-  const Friday = getFridayOfCurrentWeek();
+  const Friday = days.Friday;
   const formattedDate2 = Friday.toLocaleDateString("en-GB").replace(
     /(\d{2})\/(\d{2})\/(\d{4})/,
     "$2/$1/$3"
