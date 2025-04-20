@@ -1,12 +1,11 @@
 function assignMacroReportValue() {
   chrome.storage.local.get("macroReport", (response) => {
-    const MacroOn = response.macroReport;
-    if (!MacroOn)
-      chrome.storage.local.set(
-        { macroReport: "false" },
-        assignMacroReportValue
-      );
+    if (typeof response.macroReport === "undefined") {
+      chrome.storage.local.set({ macroReport: false }, assignMacroReportValue);
+      assignMacroReportValue();
+    }
 
+    const MacroOn = response.macroReport === true;
     const secondSubMenuItem = document.querySelector(
       "#submenu > li:nth-child(1) > a"
     );
@@ -21,12 +20,13 @@ function assignMacroReportValue() {
       fourthSubMenuItem &&
       fourthSubMenuItem.className === "active" &&
       fourthSubMenuItem.textContent === "Technician";
-    // check if user is in reports page and wants to go to the Requests Status by Technician (Closed) report
-    if (KPIreportSelected && MacroOn) navigateToDefaultReport();
+
+    if (KPIreportSelected && MacroOn) selectTechnicianReports();
     else if (TechnicianSelected && MacroOn) selectDefaultReport();
+    addCheckboxForMacro();
   });
 }
-function navigateToDefaultReport() {
+function selectTechnicianReports() {
   const technicianReports = document.querySelector(
     "#submenu > li:nth-child(5) > a"
   );
@@ -45,7 +45,22 @@ function selectDefaultReport() {
   reportSelection.selectedIndex = "10";
   reportSelection.dispatchEvent(changeEvent);
 }
-
+function addCheckboxForMacro() {
+  const areaToAddCheck = document.querySelector(
+    "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(4) > td.fieldtext"
+  );
+  if (!areaToAddCheck) return;
+  const macroCheckbox = document.createElement("input");
+  macroCheckbox.id = "macroCheckbox";
+  macroCheckbox.type = "checkbox";
+  chrome.storage.local.get("macroReport", (response) => {
+    macroCheckbox.checked = response.macroReport === true; // Ensure it's a boolean
+  });
+  areaToAddCheck.appendChild(macroCheckbox);
+  macroCheckbox.addEventListener("change", () => {
+    chrome.storage.local.set({ macroReport: macroCheckbox.checked });
+  });
+}
 function selectBoundsOfCurrWeek() {
   function getMondayOfCurrentWeek() {
     const today = new Date();
