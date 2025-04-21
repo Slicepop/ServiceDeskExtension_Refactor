@@ -32,7 +32,17 @@ function selectTechnicianReports() {
   );
   window.location.href = technicianReports.href;
 }
+function addReportFavicon() {
+  if (document.querySelector("#alienIcon")) return;
+  const originalFavicon = document.querySelector("head > link:nth-child(13)");
+  const reportFavicon = document.createElement("link");
+  reportFavicon.id = "alienIcon";
+  reportFavicon.rel = "icon";
+  reportFavicon.href = chrome.runtime.getURL("images/favicon.ico");
+  originalFavicon.parentNode.replaceChild(reportFavicon, originalFavicon);
+}
 function selectDefaultReport() {
+  addReportFavicon();
   const changeEvent = new Event("change");
   const reportSelection = document.querySelector(
     "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(1) > td.fieldtext > select"
