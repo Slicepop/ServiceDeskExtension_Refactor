@@ -1,3 +1,5 @@
+/* openedRequest.js css tags:*/
+/* save and close button */
 #Save_Close {
   float: right;
   width: 80px;
@@ -14,6 +16,7 @@
 #Save_Close:hover {
   scale: 0.8;
 }
+/* I button to show tooltip */
 #newI_Tag {
   cursor: pointer;
   pointer-events: all;
@@ -23,6 +26,30 @@
 #tooltip_info.tooltipShown {
   display: block;
 }
+/* Text inside tooltip */
 #tooltip_info > span > label {
   cursor: text;
+}
+/* descriptionDiv */
+/* #descText {
+  min-height: 80px;
+  max-height: none;
+  margin-left: 10px;
+  height: 300px;
+  overflow: auto;
+  resize: vertical;
+} */
+/* #description-tab > div.ml-2.description-box.resize-desc {
+  max-height: none;
+} */
+
+#descText {
+  overflow: none;
+  /* width: 30vw; */
+}
+.resize-desc {
+  resize: vertical;
+  min-height: 80px;
+  max-height: none;
+  height: 300px;
 }

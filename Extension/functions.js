@@ -91,7 +91,7 @@ function selectBoundsOfCurrWeek() {
     "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(4) > td.fieldtext > select"
   ).selectedIndex = 13;
 }
-function modifyRequestBTN() {
+function modifyNavRequestBTN() {
   const navRequestBTN = document.querySelector(
     "#zsd_navbar_menus > ul.navbar-nav.mr-auto > li:nth-child(2) > a"
   );
@@ -107,7 +107,6 @@ function clickReportBTN() {
   const reportsURL = reportsBTN.href;
   window.location.href = reportsURL;
 }
-
 function replaceLinks() {
   const linksToRequest = document.querySelectorAll("#requestId");
   if (!linksToRequest) return;
@@ -121,13 +120,15 @@ function replaceLinks() {
   });
 }
 function selectDefaultView() {
-  const incident = document.querySelector(
-    ".rowoverride > div.mb-3.col-10 > ul > li:nth-child(2)"
-  );
-  if (incident) {
-    const incidentNum = incident.querySelector("sup");
-    if (incidentNum && incidentNum.textContent !== "0") {
-      incident.click();
+  setTimeout(() => {
+    const incident = document.querySelector(
+      ".rowoverride > div.mb-3.col-10 > ul > li:nth-child(2)"
+    );
+    if (incident) {
+      const incidentNum = incident.querySelector("sup");
+      if (incidentNum && incidentNum.textContent !== "0") {
+        incident.click();
+      }
     }
-  }
+  }, 50);
 }

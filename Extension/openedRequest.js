@@ -1,12 +1,12 @@
 function runRequestTab() {
   fetchTitle();
-
   let debounceTimeout;
   const observer = new MutationObserver(() => {
     clearTimeout(debounceTimeout);
     debounceTimeout = setTimeout(() => {
       addSaveCloseBTN();
       changeUserTooltip();
+      modifyDescriptionClass();
     }, 10);
   });
 
@@ -81,4 +81,27 @@ function changeUserTooltip() {
       userTooltipInfo.classList.remove("tooltipShown");
     }
   });
+}
+function modifyDescriptionClass() {
+  const readMoreBTN = document.querySelector("#more_less_link");
+
+  const descriptionField = document.querySelector(
+    "#description-tab > div.ml-2.description-box"
+  );
+  const descriptionText = document.querySelector("#request-description-text");
+
+  if (
+    !descriptionField ||
+    !descriptionText ||
+    descriptionField.classList.contains("resize-desc")
+  )
+    return;
+  if (readMoreBTN) readMoreBTN.click();
+
+  descriptionText.id = "descText";
+  // descriptionField.classList.remove("ml-2");
+  // descriptionField.classList.remove("description-box");
+
+  descriptionField.classList.add("resize-desc");
+  descriptionField.style.maxHeight = descriptionField.scrollHeight + 20 + "px";
 }

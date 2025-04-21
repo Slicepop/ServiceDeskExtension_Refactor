@@ -385,10 +385,10 @@ function addCopyButton(result) {
     copyUserButton.id = "copyButton";
     document.querySelector("#searchAndCopy").appendChild(copyUserButton);
   }
-  copyUserButton.src = "./Copy.png";
+  copyUserButton.src = chrome.runtime.getURL("./images/Copy.png");
   copyUserButton.onclick = function () {
     navigator.clipboard.writeText(result.userName);
-    copyUserButton.src = "./Check.png";
+    copyUserButton.src = chrome.runtime.getURL("./images/Check.png");
   };
 }
 
