@@ -148,28 +148,26 @@ function selectDefaultView() {
 function reorderReplyNote() {
   const requestList = document.querySelectorAll(".accordion-toggle");
   requestList.forEach((item, index) => {
-    if (item.dataset.processed == "true") return;
     styleRequestItem(item, index);
     const requestReply = item.querySelector(
       "tr:nth-child(2) > td.notetext > span"
     );
-    item.dataset.processed = "true";
     if (!requestReply) return;
     requestReply.classList.add("replyNote");
   });
 }
 function styleRequestItem(item, index) {
-  if (index % 2 === 0) {
-    item.style.backgroundColor = "#ffffff";
-  } else {
-    item.style.backgroundColor = "#f0f0f0";
-  }
   const replyNote = item.querySelector(".replyNote");
   item.addEventListener("mouseover", () => {
     item.style.cursor = "default";
     if (!replyNote) return;
     replyNote.classList.add("itemHovered");
   });
+  if (index % 2 === 0) {
+    item.style.backgroundColor = "#ffffff";
+  } else {
+    item.style.backgroundColor = "#f0f0f0";
+  }
   if (!replyNote) return;
   item.addEventListener("mouseout", () => {
     replyNote.classList.remove("itemHovered");

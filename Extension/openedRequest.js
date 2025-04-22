@@ -1,5 +1,6 @@
 function runRequestTab() {
   fetchTitle();
+  openNotes();
   let debounceTimeout;
   const observer = new MutationObserver(() => {
     clearTimeout(debounceTimeout);
@@ -104,4 +105,10 @@ function modifyDescriptionClass() {
 
   descriptionField.classList.add("resize-desc");
   descriptionField.style.maxHeight = descriptionField.scrollHeight + 20 + "px";
+}
+function openNotes() {
+  const noteDiv = document.querySelector(".requestnote-card-header");
+  if (!noteDiv && noteDiv.dataset.processed) return;
+  noteDiv.dataset.processed = true;
+  noteDiv.click();
 }
