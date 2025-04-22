@@ -55,6 +55,11 @@ function selectDefaultReport() {
     reportSelection.dispatchEvent(changeEvent);
     return;
   }
+  const selectedOption = reportSelection.options[reportSelection.selectedIndex];
+  const selectedText = selectedOption
+    ? selectedOption.textContent.trim()
+    : "Service Manager";
+  document.title = selectedText;
   selectBoundsOfCurrWeek();
 }
 function addCheckboxForMacro() {
@@ -149,27 +154,94 @@ function reorderReplyNote() {
   const requestList = document.querySelectorAll(".accordion-toggle");
   requestList.forEach((item, index) => {
     styleRequestItem(item, index);
+    addToggleablePersonalNotes(item);
     const requestReply = item.querySelector(
       "tr:nth-child(2) > td.notetext > span"
     );
     if (!requestReply) return;
     requestReply.classList.add("replyNote");
+    const replyTD = item.querySelector(".notetext");
+    if (replyTD) {
+      while (replyTD.nextSibling && replyTD.nextSibling.nodeName === "TD") {
+        replyTD.parentNode.removeChild(replyTD.nextSibling);
+      }
+    }
+    item.classList.add("itemChanged");
   });
 }
+
+function addToggleablePersonalNotes(item) {
+  addNoteBTN(item);
+}
+function addNoteBTN(item) {
+  if (item.querySelector("#noteBTN")) return;
+  const incidentIcon = item.querySelector("td:nth-child(3) > img");
+  const toggleNote = document.createElement("p");
+  toggleNote.textContent = "+";
+  toggleNote.style.scale = "2";
+  toggleNote.style.cursor = "pointer";
+
+  toggleNote.id = "noteBTN";
+  toggleNote.title = "toggle Personal Note";
+  toggleNote.addEventListener("click", (event) => {
+    if (toggleNote.textContent == "+") toggleNote.textContent = "-";
+    else toggleNote.textContent = "+";
+    checkRowBelow(item);
+  });
+  try {
+    incidentIcon.parentNode.replaceChild(toggleNote, incidentIcon);
+  } catch {}
+}
+function checkRowBelow(item) {
+  const rowBelow = item.querySelector("tr:nth-child(2)");
+  if (rowBelow) {
+    //if there is a row below (if there is a reply note)
+    createOrShowHideNote(rowBelow);
+    return;
+  } else if (item.querySelector("noteRow")) return;
+  const row = document.createElement("tr");
+  row.style.color = item.style.color;
+  row.id = "noteRow";
+  row.setAttribute("_ngcontent-ng-c4256737322", "");
+  for (let i = 0; i < 5; i++) {
+    const emptyTD = document.createElement("td");
+    emptyTD.textContent = "";
+
+    emptyTD.setAttribute("_ngcontent-ng-c4256737322", "");
+    emptyTD.style.height = "10px";
+
+    row.append(emptyTD);
+  }
+
+  item.appendChild(row);
+  createOrShowHideNote(row);
+}
+function createOrShowHideNote(rowBelow) {
+  const NoteTD = rowBelow.querySelector("td:nth-child(4)");
+  if (rowBelow.querySelector("#personalNote")) {
+    const personalNote = rowBelow.querySelector("#personalNote");
+    if (rowBelow.id == "noteRow") rowBelow.remove();
+    else {
+      NoteTD.colSpan = "1";
+      personalNote.remove();
+    }
+    return;
+  }
+
+  const personalNote = document.createElement("textarea");
+  personalNote.id = "personalNote";
+  personalNote.placeholder = "Personal Note";
+  personalNote.setAttribute("_ngcontent-ng-c4256737322", "");
+  NoteTD.colSpan = "6";
+  NoteTD.appendChild(personalNote);
+}
 function styleRequestItem(item, index) {
-  const replyNote = item.querySelector(".replyNote");
   item.addEventListener("mouseover", () => {
     item.style.cursor = "default";
-    if (!replyNote) return;
-    replyNote.classList.add("itemHovered");
   });
   if (index % 2 === 0) {
     item.style.backgroundColor = "#ffffff";
   } else {
     item.style.backgroundColor = "#f0f0f0";
   }
-  if (!replyNote) return;
-  item.addEventListener("mouseout", () => {
-    replyNote.classList.remove("itemHovered");
-  });
 }

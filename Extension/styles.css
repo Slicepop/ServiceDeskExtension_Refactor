@@ -55,13 +55,21 @@
 }
 /* Main view tags: */
 .replyNote {
-  float: right;
   outline-style: solid;
   outline-width: 0.5px;
   outline-color: #63fbf0;
   transition: all 0.15s;
   border-radius: 5px;
 }
-.replyNote.itemHovered {
-  scale: 1.08;
+#personalNote {
+  outline-style: solid;
+  min-width: 50px;
+  max-width: 32vw;
+  outline-width: 0.25px;
+  background-color: rgba(230, 230, 230, 0);
+  outline-color: #63fbf0;
+  border-radius: 5px;
+  margin-top: -15px;
+  resize: both;
+  float: left;
 }
