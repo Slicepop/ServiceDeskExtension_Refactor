@@ -1,4 +1,6 @@
 function assignMacroReportValue() {
+  // checks/sets  if user has selected to automatically go to 'Requests Status by Technician (Closed)' report
+
   chrome.storage.local.get("macroReport", (response) => {
     if (typeof response.macroReport === "undefined") {
       chrome.storage.local.set({ macroReport: false }, assignMacroReportValue);
@@ -102,6 +104,8 @@ function selectBoundsOfCurrWeek() {
   ).selectedIndex = 13;
 }
 function modifyNavRequestBTN() {
+  // modifies request button at the top to not have woa/wo/9.0.33.7.1.1 at the end of url
+  // woa/wo/9.0.33.7.1.1 causes the session to expire eventually
   const navRequestBTN = document.querySelector(
     "#zsd_navbar_menus > ul.navbar-nav.mr-auto > li:nth-child(2) > a"
   );
@@ -125,7 +129,6 @@ function replaceLinks() {
     newLink.textContent = link.textContent.trim();
     newLink.href = `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${newLink.textContent}`;
     newLink.target = "_blank";
-    newLink.dataset.processed = true;
     link.parentNode.replaceChild(newLink, link);
   });
 }
@@ -141,4 +144,34 @@ function selectDefaultView() {
       }
     }
   }, 50);
+}
+function reorderReplyNote() {
+  const requestList = document.querySelectorAll(".accordion-toggle");
+  requestList.forEach((item, index) => {
+    if (item.dataset.processed == "true") return;
+    styleRequestItem(item, index);
+    const requestReply = item.querySelector(
+      "tr:nth-child(2) > td.notetext > span"
+    );
+    item.dataset.processed = "true";
+    if (!requestReply) return;
+    requestReply.classList.add("replyNote");
+  });
+}
+function styleRequestItem(item, index) {
+  if (index % 2 === 0) {
+    item.style.backgroundColor = "#ffffff";
+  } else {
+    item.style.backgroundColor = "#f0f0f0";
+  }
+  const replyNote = item.querySelector(".replyNote");
+  item.addEventListener("mouseover", () => {
+    item.style.cursor = "default";
+    if (!replyNote) return;
+    replyNote.classList.add("itemHovered");
+  });
+  if (!replyNote) return;
+  item.addEventListener("mouseout", () => {
+    replyNote.classList.remove("itemHovered");
+  });
 }

@@ -53,3 +53,15 @@
   max-height: none;
   height: 300px;
 }
+/* Main view tags: */
+.replyNote {
+  float: right;
+  outline-style: solid;
+  outline-width: 0.5px;
+  outline-color: #63fbf0;
+  transition: all 0.15s;
+  border-radius: 5px;
+}
+.replyNote.itemHovered {
+  scale: 1.08;
+}
