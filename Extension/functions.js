@@ -198,9 +198,9 @@ function checkRowBelow(item) {
   const rowBelow = item.querySelector("tr:nth-child(2)");
   if (rowBelow) {
     //if there is a row below (if there is a reply note)
-    createOrShowHideNote(rowBelow);
+    createOrShowHideNote(rowBelow, item);
     return;
-  } else if (item.querySelector("#noteRow")) return;
+  } else if (item.querySelector("noteRow")) return;
   const row = document.createElement("tr");
   row.style.color = item.style.color;
   row.id = "noteRow";
@@ -230,6 +230,7 @@ async function createOrShowHideNote(rowBelow, item) {
     return;
   }
   const requestID = item.querySelector("#requestNum");
+
   const NoteDetails = await getRequestNote(requestID.textContent);
   const personalNote = document.createElement("textarea");
   if (NoteDetails) {
