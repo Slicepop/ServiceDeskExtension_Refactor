@@ -235,8 +235,8 @@ async function createOrShowHideNote(rowBelow, item) {
   const personalNote = document.createElement("textarea");
   if (NoteDetails) {
     personalNote.value = NoteDetails.note;
-    // personalNote.style.width = NoteDetails.width;
-    // personalNote.style.height = NoteDetails.height;
+    personalNote.style.width = NoteDetails.width;
+    personalNote.style.height = NoteDetails.height;
   }
   personalNote.id = "personalNote";
   personalNote.placeholder = "Personal Note";
@@ -248,11 +248,30 @@ async function createOrShowHideNote(rowBelow, item) {
       chrome.storage.local.remove(requestID.textContent);
     } else {
       chrome.storage.local.set({
-        [requestID.textContent]: { note: personalNote.value },
+        [requestID.textContent]: {
+          note: personalNote.value,
+          height: personalNote.style.height,
+          width: personalNote.style.width,
+        },
       });
-      console.log("S");
     }
   });
+
+  const resizeObserver = new ResizeObserver(() => {
+    if (personalNote.value.trim() == "") {
+      chrome.storage.local.remove(requestID.textContent);
+    } else {
+      chrome.storage.local.set({
+        [requestID.textContent]: {
+          note: personalNote.value,
+          height: personalNote.style.height,
+          width: personalNote.style.width,
+        },
+      });
+    }
+  });
+
+  resizeObserver.observe(personalNote);
 }
 function styleRequestItem(item, index) {
   item.addEventListener("mouseover", () => {
