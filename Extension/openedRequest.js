@@ -34,6 +34,14 @@ async function fetchTitle() {
     document.title = data.subject;
   } catch (error) {}
 }
+function handleSave() {
+  try {
+    chrome.runtime.sendMessage({ message: "updateRequest" });
+  } catch {}
+  setTimeout(() => {
+    window.close();
+  }, 800);
+}
 function addSaveCloseBTN() {
   if (document.querySelector("#Save_Close")) return;
 
@@ -41,11 +49,8 @@ function addSaveCloseBTN() {
   SaveClose.id = "Save_Close";
   SaveClose.textContent = "SAVE\n+\nCLOSE";
   SaveClose.title = "Saves Ticket and Closes Window";
-  SaveClose.addEventListener("click", () => {
-    setTimeout(() => {
-      window.close();
-    }, 800);
-  });
+
+  SaveClose.addEventListener("click", handleSave);
   document
     .querySelector(
       "#request_general_container > div > div.card-header.general-card-header > button"

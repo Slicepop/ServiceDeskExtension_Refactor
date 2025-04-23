@@ -72,4 +72,10 @@
   margin-top: -15px;
   resize: both;
   float: left;
+  color: #8efdfb;
+}
+#noteBTN {
+  scale: 2;
+  cursor: pointer;
+  user-select: none;
 }

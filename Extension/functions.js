@@ -1,3 +1,7 @@
+function refreshPage() {
+  const refreshBTN = document.querySelector(".reseticon > em");
+  if (refreshBTN) refreshBTN.click();
+}
 function assignMacroReportValue() {
   // checks/sets  if user has selected to automatically go to 'Requests Status by Technician (Closed)' report
 
@@ -131,6 +135,7 @@ function replaceLinks() {
   if (!linksToRequest) return;
   linksToRequest.forEach((link) => {
     const newLink = document.createElement("a");
+    newLink.id = "requestNum";
     newLink.textContent = link.textContent.trim();
     newLink.href = `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${newLink.textContent}`;
     newLink.target = "_blank";
@@ -169,7 +174,6 @@ function reorderReplyNote() {
     item.classList.add("itemChanged");
   });
 }
-
 function addToggleablePersonalNotes(item) {
   addNoteBTN(item);
 }
@@ -178,11 +182,9 @@ function addNoteBTN(item) {
   const incidentIcon = item.querySelector("td:nth-child(3) > img");
   const toggleNote = document.createElement("p");
   toggleNote.textContent = "+";
-  toggleNote.style.scale = "2";
-  toggleNote.style.cursor = "pointer";
 
   toggleNote.id = "noteBTN";
-  toggleNote.title = "toggle Personal Note";
+  toggleNote.title = "Toggle Personal Note";
   toggleNote.addEventListener("click", (event) => {
     if (toggleNote.textContent == "+") toggleNote.textContent = "-";
     else toggleNote.textContent = "+";
@@ -198,7 +200,7 @@ function checkRowBelow(item) {
     //if there is a row below (if there is a reply note)
     createOrShowHideNote(rowBelow);
     return;
-  } else if (item.querySelector("noteRow")) return;
+  } else if (item.querySelector("#noteRow")) return;
   const row = document.createElement("tr");
   row.style.color = item.style.color;
   row.id = "noteRow";
@@ -214,9 +216,9 @@ function checkRowBelow(item) {
   }
 
   item.appendChild(row);
-  createOrShowHideNote(row);
+  createOrShowHideNote(row, item);
 }
-function createOrShowHideNote(rowBelow) {
+async function createOrShowHideNote(rowBelow, item) {
   const NoteTD = rowBelow.querySelector("td:nth-child(4)");
   if (rowBelow.querySelector("#personalNote")) {
     const personalNote = rowBelow.querySelector("#personalNote");
@@ -227,13 +229,29 @@ function createOrShowHideNote(rowBelow) {
     }
     return;
   }
-
+  const requestID = item.querySelector("#requestNum");
+  const NoteDetails = await getRequestNote(requestID.textContent);
   const personalNote = document.createElement("textarea");
+  if (NoteDetails) {
+    personalNote.value = NoteDetails.note;
+    // personalNote.style.width = NoteDetails.width;
+    // personalNote.style.height = NoteDetails.height;
+  }
   personalNote.id = "personalNote";
   personalNote.placeholder = "Personal Note";
   personalNote.setAttribute("_ngcontent-ng-c4256737322", "");
   NoteTD.colSpan = "6";
   NoteTD.appendChild(personalNote);
+  personalNote.addEventListener("change", () => {
+    if (personalNote.value.trim() == "") {
+      chrome.storage.local.remove(requestID.textContent);
+    } else {
+      chrome.storage.local.set({
+        [requestID.textContent]: { note: personalNote.value },
+      });
+      console.log("S");
+    }
+  });
 }
 function styleRequestItem(item, index) {
   item.addEventListener("mouseover", () => {
@@ -244,4 +262,11 @@ function styleRequestItem(item, index) {
   } else {
     item.style.backgroundColor = "#f0f0f0";
   }
+}
+function getRequestNote(requestID) {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(requestID, (response) => {
+      resolve(response[requestID] || null);
+    });
+  });
 }

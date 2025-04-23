@@ -3,6 +3,9 @@
   "name": "Service Desk Upgrade V2",
   "version": "1.0.0",
   "permissions": ["activeTab", "offscreen", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
 
   "action": {
     "default_icon": "images/favicon.png",
