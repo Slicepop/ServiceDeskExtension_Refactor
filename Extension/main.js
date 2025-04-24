@@ -24,6 +24,7 @@ else {
     debounceTimeout = setTimeout(() => {
       replaceLinks();
       reorderReplyNote();
+      updateFilterInputStyle();
     }, 10);
   });
 

@@ -130,6 +130,22 @@ function clickReportBTN() {
   const reportsURL = reportsBTN.href;
   window.location.href = reportsURL;
 }
+function updateFilterInputStyle() {
+  const filterDiv = document.querySelector("#generalfilterbody");
+  if (!filterDiv) return;
+  const filterSelects = filterDiv.querySelectorAll("select");
+  filterSelects.forEach((select) => {
+    select.style.maxHeight = select.scrollHeight + "px";
+    if (
+      select.name == "selectedTechnician" ||
+      (select.name == "selectdTeams" &&
+        select.style.maxHeight != select.scrollHeight + "px")
+    ) {
+      select.style.resize = "vertical";
+      select.style.maxHeight = select.scrollHeight + "px";
+    }
+  });
+}
 function replaceLinks() {
   const linksToRequest = document.querySelectorAll("#requestId");
   if (!linksToRequest) return;
@@ -185,14 +201,43 @@ function addNoteBTN(item) {
 
   toggleNote.id = "noteBTN";
   toggleNote.title = "Toggle Personal Note";
+  const requestID = item.querySelector("#requestNum");
+  // shouldNoteOpen(requestID);
   toggleNote.addEventListener("click", (event) => {
-    if (toggleNote.textContent == "+") toggleNote.textContent = "-";
-    else toggleNote.textContent = "+";
+    if (toggleNote.textContent == "+") {
+      toggleNote.textContent = "-";
+      // chrome.storage.local.get(requestID.textContent, (response) => {
+      //   chrome.storage.local.set({
+      //     [requestID.textContent]: {
+      //       ...response[requestID.textContent],
+      //       open: false,
+      //     },
+      //   });
+      // });
+    } else {
+      toggleNote.textContent = "+";
+      // chrome.storage.local.get(requestID.textContent, (response) => {
+      //   chrome.storage.local.set({
+      //     [requestID.textContent]: {
+      //       ...response[requestID.textContent],
+      //       open: true,
+      //     },
+      //   });
+      // });
+    }
     checkRowBelow(item);
   });
+
   try {
     incidentIcon.parentNode.replaceChild(toggleNote, incidentIcon);
   } catch {}
+}
+function shouldNoteOpen(requestID) {
+  chrome.storage.local.get(requestID, (response) => {
+    if (typeof response.open === "undefined") {
+      chrome.storage.local.set({ open: false });
+    } else if (response.open === true) checkRowBelow();
+  });
 }
 function checkRowBelow(item) {
   const rowBelow = item.querySelector("tr:nth-child(2)");
