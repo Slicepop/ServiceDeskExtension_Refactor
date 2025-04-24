@@ -10,9 +10,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 modifyNavRequestBTN();
 assignMacroReportValue();
-if (window.location.href.includes("LookupRequest?")) runRequestTab();
+// if (window.location.href.includes("LookupRequest?")) runRequestTab();
 // if you have a request opened
-else if (window.location.href.includes("/reports")) clickReportBTN();
+if (window.location.href.includes("/reports")) clickReportBTN();
 // if you go to url with '/reports' redirect to the reports page
 else {
   // support site not looking at individual request and not looking at /reports

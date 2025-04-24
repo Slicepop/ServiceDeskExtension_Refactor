@@ -1,3 +1,4 @@
+runRequestTab();
 function runRequestTab() {
   fetchTitle();
   openNotes();

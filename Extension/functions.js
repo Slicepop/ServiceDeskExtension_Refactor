@@ -133,20 +133,25 @@ function clickReportBTN() {
 function updateFilterInputStyle() {
   const filterDiv = document.querySelector("#generalfilterbody");
   if (!filterDiv) return;
+
   const filterSelects = filterDiv.querySelectorAll("select");
   filterSelects.forEach((select) => {
     select.style.maxHeight = select.scrollHeight + "px";
-    if (
-      select.name == "selectedTechnician" ||
-      (select.name == "selectdTeams" &&
-        select.style.maxHeight != select.scrollHeight + "px")
-    ) {
+    if (select.name == "selectedTechnician") {
+      if (select.classList.contains("modified")) {
+        console.log("ASDASD");
+        return;
+      }
+      select.classList.add("modified");
       select.style.resize = "vertical";
       select.style.maxHeight = select.scrollHeight + "px";
       select.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
           const applyBTN = document.querySelector("#modalApplyButton");
-          if (applyBTN) applyBTN.click();
+          if (applyBTN) {
+            console.log("sa");
+            applyBTN.click();
+          }
         }
       });
     }
