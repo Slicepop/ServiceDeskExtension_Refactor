@@ -2,6 +2,15 @@ function refreshPage() {
   const refreshBTN = document.querySelector(".reseticon > em");
   if (refreshBTN) refreshBTN.click();
 }
+function checkForRequestPage() {
+  //openeing a request not on the main page would make it so its not using LookupRequest making openedRequest.js not to run
+  const requestNum = document.querySelector(
+    // I keep this long to ensure its in the request page
+    "#editRequest > div.card.request-subject.common-subject-description-card.ml-0 > div > div.priority_requestnumber > p.request-number"
+  );
+  if (!requestNum || window.location.href.includes("/LookupRequest")) return;
+  window.location.href = `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${requestNum.textContent}`;
+}
 function assignMacroReportValue() {
   // checks/sets  if user has selected to automatically go to 'Requests Status by Technician (Closed)' report
 

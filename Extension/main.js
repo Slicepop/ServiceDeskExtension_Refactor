@@ -25,6 +25,7 @@ else {
       replaceLinks();
       reorderReplyNote();
       updateFilterInputStyle();
+      checkForRequestPage();
     }, 10);
   });
 
