@@ -143,6 +143,12 @@ function updateFilterInputStyle() {
     ) {
       select.style.resize = "vertical";
       select.style.maxHeight = select.scrollHeight + "px";
+      select.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          const applyBTN = document.querySelector("#modalApplyButton");
+          if (applyBTN) applyBTN.click();
+        }
+      });
     }
   });
 }
