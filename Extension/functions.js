@@ -137,7 +137,7 @@ function updateFilterInputStyle() {
   const filterSelects = filterDiv.querySelectorAll("select");
   filterSelects.forEach((select) => {
     select.style.maxHeight = select.scrollHeight + "px";
-    if (select.name == "selectedTechnician") {
+    if (select.name == "selectedTechnician" || select.name == "selectdTeams") {
       if (select.classList.contains("modified")) {
         console.log("ASDASD");
         return;
