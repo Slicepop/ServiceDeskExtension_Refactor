@@ -351,10 +351,14 @@ function styleRequestItem(item, index) {
     item.style.backgroundColor = "#f0f0f0";
   }
 }
-function getRequestNote(requestID) {
+async function getRequestNote(requestID) {
   return new Promise((resolve) => {
-    chrome.storage.local.get(requestID, (response) => {
-      resolve(response[requestID] || null);
+    chrome.storage.local.get(requestID, (result) => {
+      if (!result[requestID]) {
+        resolve(null);
+      } else {
+        resolve(result[requestID]);
+      }
     });
   });
 }
