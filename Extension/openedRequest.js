@@ -1,5 +1,6 @@
 runRequestTab();
 function runRequestTab() {
+  updateFavicon();
   fetchTitle();
   openNotes();
   let debounceTimeout;
@@ -16,6 +17,15 @@ function runRequestTab() {
     childList: true,
     subtree: true,
   });
+}
+function updateFavicon() {
+  if (document.querySelector("#requestIcon")) return;
+  const originalFavicon = document.querySelector("head > link:nth-child(13)");
+  const requestFavicon = document.createElement("link");
+  requestFavicon.id = "requestIcon";
+  requestFavicon.rel = "icon";
+  requestFavicon.href = chrome.runtime.getURL("images/request.ico");
+  originalFavicon.parentNode.replaceChild(requestFavicon, originalFavicon);
 }
 async function fetchTitle() {
   const itemID = window.location.href.split("requestId=")[1];
@@ -110,7 +120,7 @@ function modifyDescriptionClass() {
   // descriptionField.classList.remove("description-box");
 
   descriptionField.classList.add("resize-desc");
-  descriptionField.style.maxHeight = descriptionField.scrollHeight + 20 + "px";
+  descriptionField.style.maxHeight = descriptionField.scrollHeight + 10 + "px";
 }
 function openNotes() {
   const noteDiv = document.querySelector(".requestnote-card-header");

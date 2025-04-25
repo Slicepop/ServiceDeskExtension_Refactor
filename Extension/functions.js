@@ -53,7 +53,7 @@ function addReportFavicon() {
   const reportFavicon = document.createElement("link");
   reportFavicon.id = "alienIcon";
   reportFavicon.rel = "icon";
-  reportFavicon.href = chrome.runtime.getURL("images/favicon.ico");
+  reportFavicon.href = chrome.runtime.getURL("images/report.png");
   originalFavicon.parentNode.replaceChild(reportFavicon, originalFavicon);
 }
 function selectDefaultReport() {
@@ -132,12 +132,15 @@ function modifyNavRequestBTN() {
   navRequestBTN.href = "https://support.wmed.edu/LiveTime/WebObjects/LiveTime";
 }
 function clickReportBTN() {
+  addReportFavicon();
   const reportsBTN = document.querySelector(
     "#zsd_navbar_menus > ul.navbar-nav.mr-auto > li:nth-child(7) > a"
   );
   if (!reportsBTN) return;
   const reportsURL = reportsBTN.href;
-  window.location.href = reportsURL;
+  setTimeout(() => {
+    window.location.href = reportsURL;
+  }, 100);
 }
 function updateFilterInputStyle() {
   const filterDiv = document.querySelector("#generalfilterbody");

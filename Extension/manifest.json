@@ -15,7 +15,7 @@
   "host_permissions": ["https://support.wmed.edu/*"],
   "web_accessible_resources": [
     {
-      "resources": ["styles.css", "images/favicon.ico"],
+      "resources": ["styles.css", "images/report.png", "images/request.ico"],
       "matches": ["https://support.wmed.edu/*"]
     }
   ],
