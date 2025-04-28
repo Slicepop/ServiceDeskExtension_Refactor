@@ -28,6 +28,9 @@
   "content_scripts": [
     {
       "matches": ["https://support.wmed.edu/LiveTime/WebObjects/*"],
+      "exclude_matches": [
+        "https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?*"
+      ],
       "js": ["functions.js", "main.js"],
       "css": ["styles.css"],
       "type": "module",

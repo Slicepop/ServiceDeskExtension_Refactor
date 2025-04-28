@@ -280,7 +280,6 @@ function shouldNoteOpen(requestID) {
     });
   });
 }
-
 function checkRowBelow(item) {
   const rowBelow = item.querySelector("tr:nth-child(2)");
   if (rowBelow) {
