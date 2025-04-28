@@ -151,7 +151,6 @@ function updateFilterInputStyle() {
     select.style.maxHeight = select.scrollHeight + "px";
     if (select.name == "selectedTechnician" || select.name == "selectdTeams") {
       if (select.classList.contains("modified")) {
-        console.log("ASDASD");
         return;
       }
       select.classList.add("modified");
@@ -225,7 +224,15 @@ function addNoteBTN(item) {
   toggleNote.id = "noteBTN";
   toggleNote.title = "Toggle Personal Note";
   const requestID = item.querySelector("#requestNum");
-  // shouldNoteOpen(requestID);
+  shouldNoteOpen(requestID).then((noteActive) => {
+    if (noteActive) {
+      checkRowBelow(item);
+      toggleNote.textContent = "-";
+
+      toggleNote.style.color = "#5de6dc";
+    }
+  });
+
   toggleNote.addEventListener("click", (event) => {
     if (toggleNote.textContent == "+") {
       toggleNote.textContent = "-";
@@ -256,12 +263,24 @@ function addNoteBTN(item) {
   } catch {}
 }
 function shouldNoteOpen(requestID) {
-  chrome.storage.local.get(requestID, (response) => {
-    if (typeof response.open === "undefined") {
-      chrome.storage.local.set({ open: false });
-    } else if (response.open === true) checkRowBelow();
+  const requestText = requestID.textContent;
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(requestText, (response) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+        return;
+      }
+
+      if (typeof response[requestText] === "undefined") {
+        resolve(false);
+      } else {
+        checkRowBelow(requestID);
+        resolve(true);
+      }
+    });
   });
 }
+
 function checkRowBelow(item) {
   const rowBelow = item.querySelector("tr:nth-child(2)");
   if (rowBelow) {
@@ -298,7 +317,7 @@ async function createOrShowHideNote(rowBelow, item) {
     return;
   }
   const requestID = item.querySelector("#requestNum");
-
+  if (!requestID) return;
   const NoteDetails = await getRequestNote(requestID.textContent);
   const personalNote = document.createElement("textarea");
   if (NoteDetails) {
