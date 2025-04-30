@@ -10,6 +10,7 @@ function runRequestTab() {
       addSaveCloseBTN();
       changeUserTooltip();
       modifyDescriptionClass();
+      modifySelectClass();
     }, 10);
   });
 
@@ -121,6 +122,19 @@ function modifyDescriptionClass() {
 
   descriptionField.classList.add("resize-desc");
   descriptionField.style.maxHeight = descriptionField.scrollHeight + 10 + "px";
+}
+function modifySelectClass() {
+  const selects = document.querySelectorAll("select");
+  selects.forEach((select) => {
+    const options = select.querySelectorAll("option");
+    options.forEach((option, index) => {
+      if (index % 2 === 0) {
+        option.style.backgroundColor = "#ffffff";
+      } else {
+        option.style.backgroundColor = "#f0f0f0";
+      }
+    });
+  });
 }
 function openNotes() {
   const noteDiv = document.querySelector(".requestnote-card-header");

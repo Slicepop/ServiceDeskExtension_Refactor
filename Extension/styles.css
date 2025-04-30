@@ -79,3 +79,6 @@
   cursor: pointer;
   user-select: none;
 }
+.selectEL:nth-child(2n) {
+  background-color: "#ffffff";
+}
