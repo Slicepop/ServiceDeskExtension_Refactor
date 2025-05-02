@@ -47,6 +47,9 @@
   overflow: none;
   /* width: 30vw; */
 }
+#descText .email {
+  padding: 10px;
+}
 .resize-desc {
   resize: vertical;
   min-height: 80px;

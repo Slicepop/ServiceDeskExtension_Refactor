@@ -9,7 +9,7 @@ function runRequestTab() {
     debounceTimeout = setTimeout(() => {
       addSaveCloseBTN();
       changeUserTooltip();
-      modifyDescriptionClass();
+      modifyDescriptionStyle();
       modifySelectClass();
     }, 10);
   });
@@ -100,7 +100,26 @@ function changeUserTooltip() {
     }
   });
 }
-function modifyDescriptionClass() {
+function modifyDescriptionStyle() {
+  String.prototype.insert = function (index, string) {
+    if (index > 0) {
+      return this.substring(0, index) + string + this.substring(index);
+    }
+    return string + this;
+  };
+
+  function wrapAndColorEmails(descText) {
+    const content = descText.innerHTML;
+    const emails = content.split(/(?=From:)/g);
+
+    const wrappedEmails = emails.map((email, index) => {
+      const background = index % 2 === 0 ? "#ffffff" : "#f0f0f0";
+      return `<div class="email"   style="background-color: ${background};">${email}</div>`;
+    });
+
+    descText.innerHTML = wrappedEmails.join("");
+  }
+
   const readMoreBTN = document.querySelector("#more_less_link");
 
   const descriptionField = document.querySelector(
@@ -108,12 +127,7 @@ function modifyDescriptionClass() {
   );
   const descriptionText = document.querySelector("#request-description-text");
 
-  if (
-    !descriptionField ||
-    !descriptionText ||
-    descriptionField.classList.contains("resize-desc")
-  )
-    return;
+  if (!descriptionField || !descriptionText) return;
   if (readMoreBTN) readMoreBTN.click();
 
   descriptionText.id = "descText";
@@ -122,6 +136,7 @@ function modifyDescriptionClass() {
 
   descriptionField.classList.add("resize-desc");
   descriptionField.style.maxHeight = descriptionField.scrollHeight + 10 + "px";
+  wrapAndColorEmails(descriptionText);
 }
 function modifySelectClass() {
   const selects = document.querySelectorAll("select");
