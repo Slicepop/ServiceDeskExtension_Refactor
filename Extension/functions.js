@@ -91,7 +91,7 @@ function addCheckboxForMacro() {
     chrome.storage.local.set({ macroReport: macroCheckbox.checked });
   });
 }
-function getWorkWeekDates() {
+function getDaysOfCurrentWeek() {
   const today = new Date();
   const dayOfWeek = today.getDay(); // Sunday = 0, Monday = 1, etc.
   const distanceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
@@ -118,19 +118,19 @@ function getWorkWeekDates() {
 }
 
 function selectBoundsOfCurrWeek() {
+  const formatToMMDDYY = (date) => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear().toString().slice(2); // "25" instead of "2025"
+    return `${month}/${day}/${year}`;
+  };
   const days = getDaysOfCurrentWeek();
-  const Monday = days.Monday;
-  const formattedDate = Monday.toLocaleDateString("en-GB").replace(
-    /(\d{2})\/(\d{2})\/(\d{4})/,
-    "$2/$1/$3"
+
+  document.querySelector("#startDateUserTZ").value = formatToMMDDYY(
+    days.Monday
   );
-  document.querySelector("#startDateUserTZ").value = formattedDate;
-  const Friday = days.Friday;
-  const formattedDate2 = Friday.toLocaleDateString("en-GB").replace(
-    /(\d{2})\/(\d{2})\/(\d{4})/,
-    "$2/$1/$3"
-  );
-  document.querySelector("#endDateUserTZ").value = formattedDate2;
+
+  document.querySelector("#endDateUserTZ").value = formatToMMDDYY(days.Friday);
   document.querySelector(
     "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(4) > td.fieldtext > select"
   ).selectedIndex = 13;
