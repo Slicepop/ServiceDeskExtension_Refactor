@@ -92,17 +92,21 @@ function addCheckboxForMacro() {
   });
 }
 function getDaysOfCurrentWeek() {
-  const Monday = new Date();
-  const dayOfWeek = Monday.getDay(); // Sunday = 0, Monday = 1, etc.
-  const distanceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // If Sunday (0), move back 6 days, otherwise move back `dayOfWeek - 1`
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // Sunday = 0, Monday = 1, etc.
+  const distanceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
-  Monday.setDate(Monday.getDate() - distanceToMonday);
-  Monday.setHours(0, 0, 0, 0); // Set time to the start of the day
+  const Monday = new Date(today);
+  Monday.setDate(today.getDate() - distanceToMonday);
+  Monday.setHours(0, 0, 0, 0); // Start of Monday
 
-  const Friday = new Date();
-  Friday.setDate(Monday.getDate() + 4); // grab Friday which would be 4 days after Monday
-  return { Monday: Monday, Friday: Friday };
+  const Friday = new Date(Monday);
+  Friday.setDate(Monday.getDate() + 4);
+  Friday.setHours(23, 59, 59, 999); // End of Friday, optional
+
+  return { Monday, Friday };
 }
+
 function selectBoundsOfCurrWeek() {
   const days = getDaysOfCurrentWeek();
   const Monday = days.Monday;
