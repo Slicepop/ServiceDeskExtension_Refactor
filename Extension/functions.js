@@ -91,7 +91,7 @@ function addCheckboxForMacro() {
     chrome.storage.local.set({ macroReport: macroCheckbox.checked });
   });
 }
-function getDaysOfCurrentWeek() {
+function getWorkWeekDates() {
   const today = new Date();
   const dayOfWeek = today.getDay(); // Sunday = 0, Monday = 1, etc.
   const distanceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
@@ -102,9 +102,19 @@ function getDaysOfCurrentWeek() {
 
   const Friday = new Date(Monday);
   Friday.setDate(Monday.getDate() + 4);
-  Friday.setHours(23, 59, 59, 999); // End of Friday, optional
+  Friday.setHours(23, 59, 59, 999); // End of Friday
 
-  return { Monday, Friday };
+  // Format year to two digits
+  const formatDate = (date) => ({
+    year: String(date.getFullYear()).slice(-2),
+    month: date.getMonth() + 1, // Months are 0-indexed
+    day: date.getDate(),
+  });
+
+  return {
+    Monday,
+    Friday,
+  };
 }
 
 function selectBoundsOfCurrWeek() {
