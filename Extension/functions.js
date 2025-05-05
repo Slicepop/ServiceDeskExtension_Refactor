@@ -226,9 +226,115 @@ function reorderReplyNote() {
     item.classList.add("itemChanged");
   });
 }
+
+async function createOrShowHideNote(rowBelow, item) {
+  const NoteTD = rowBelow.querySelector("td:nth-child(4)");
+  if (rowBelow.querySelector("#personalNote")) {
+    const personalNote = rowBelow.querySelector("#personalNote");
+    if (rowBelow.id == "noteRow") rowBelow.remove();
+    else {
+      NoteTD.colSpan = "1";
+      personalNote.remove();
+    }
+    return;
+  }
+  const requestID = item.querySelector("#requestNum");
+  if (!requestID) return;
+  const NoteDetails = await getRequestNote(requestID.textContent);
+  const personalNote = document.createElement("textarea");
+  if (NoteDetails) {
+    personalNote.value = NoteDetails.note;
+    personalNote.style.width = NoteDetails.width;
+    personalNote.style.height = NoteDetails.height;
+  }
+  personalNote.id = "personalNote";
+  personalNote.placeholder = "Personal Note";
+  personalNote.setAttribute("_ngcontent-ng-c4256737322", "");
+  NoteTD.colSpan = "6";
+  NoteTD.appendChild(personalNote);
+  personalNote.addEventListener("change", () => {
+    if (personalNote.value.trim() == "") {
+      chrome.storage.local.remove(requestID.textContent);
+    } else {
+      chrome.storage.local.set({
+        [requestID.textContent]: {
+          note: personalNote.value,
+          height: personalNote.style.height,
+          width: personalNote.style.width,
+          timestamp: Date.now(),
+        },
+      });
+    }
+  });
+
+  const resizeObserver = new ResizeObserver(() => {
+    if (personalNote.value.trim() == "") {
+      chrome.storage.local.remove(requestID.textContent);
+    } else {
+      chrome.storage.local.set({
+        [requestID.textContent]: {
+          note: personalNote.value,
+          height: personalNote.style.height,
+          width: personalNote.style.width,
+          timestamp: Date.now(),
+        },
+      });
+    }
+  });
+
+  resizeObserver.observe(personalNote);
+}
+function styleRequestItem(item, index) {
+  item.addEventListener("mouseover", () => {
+    item.style.cursor = "default";
+  });
+  if (index % 2 === 0) {
+    item.style.backgroundColor = "#ffffff";
+  } else {
+    item.style.backgroundColor = "#f0f0f0";
+  }
+}
+async function getRequestNote(requestID) {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(requestID, (result) => {
+      if (!result[requestID]) {
+        resolve(null);
+      } else {
+        resolve(result[requestID]);
+      }
+    });
+  });
+}
+
 function addToggleablePersonalNotes(item) {
   addNoteBTN(item);
 }
+function checkExpiredNotes() {
+  const currentDate = Date.now();
+  const twoMonthsTime = 1000 * 60 * 60 * 24 * 60; // 60 days in ms
+
+  chrome.storage.local.get(null, (items) => {
+    for (const [key, value] of Object.entries(items)) {
+      try {
+        if (
+          typeof value === "object" &&
+          value !== null &&
+          "height" in value &&
+          "timestamp" in value
+        ) {
+          const elapsedTime = currentDate - value.timestamp;
+          if (elapsedTime > twoMonthsTime) {
+            chrome.storage.local.remove(key);
+            console.log(`Removed expired note: ${key}`);
+          }
+        }
+      } catch (err) {
+        console.warn(`Error processing key "${key}":`, err);
+      }
+    }
+  });
+}
+
 function addNoteBTN(item) {
   if (item.querySelector("#noteBTN")) return;
   const incidentIcon = item.querySelector("td:nth-child(3) > img");
@@ -276,6 +382,7 @@ function addNoteBTN(item) {
     incidentIcon.parentNode.replaceChild(toggleNote, incidentIcon);
   } catch {}
 }
+
 function shouldNoteOpen(requestID) {
   const requestText = requestID.textContent;
   return new Promise((resolve, reject) => {
@@ -294,6 +401,7 @@ function shouldNoteOpen(requestID) {
     });
   });
 }
+
 function checkRowBelow(item) {
   const rowBelow = item.querySelector("tr:nth-child(2)");
   if (rowBelow) {
@@ -317,80 +425,4 @@ function checkRowBelow(item) {
 
   item.appendChild(row);
   createOrShowHideNote(row, item);
-}
-async function createOrShowHideNote(rowBelow, item) {
-  const NoteTD = rowBelow.querySelector("td:nth-child(4)");
-  if (rowBelow.querySelector("#personalNote")) {
-    const personalNote = rowBelow.querySelector("#personalNote");
-    if (rowBelow.id == "noteRow") rowBelow.remove();
-    else {
-      NoteTD.colSpan = "1";
-      personalNote.remove();
-    }
-    return;
-  }
-  const requestID = item.querySelector("#requestNum");
-  if (!requestID) return;
-  const NoteDetails = await getRequestNote(requestID.textContent);
-  const personalNote = document.createElement("textarea");
-  if (NoteDetails) {
-    personalNote.value = NoteDetails.note;
-    personalNote.style.width = NoteDetails.width;
-    personalNote.style.height = NoteDetails.height;
-  }
-  personalNote.id = "personalNote";
-  personalNote.placeholder = "Personal Note";
-  personalNote.setAttribute("_ngcontent-ng-c4256737322", "");
-  NoteTD.colSpan = "6";
-  NoteTD.appendChild(personalNote);
-  personalNote.addEventListener("change", () => {
-    if (personalNote.value.trim() == "") {
-      chrome.storage.local.remove(requestID.textContent);
-    } else {
-      chrome.storage.local.set({
-        [requestID.textContent]: {
-          note: personalNote.value,
-          height: personalNote.style.height,
-          width: personalNote.style.width,
-        },
-      });
-    }
-  });
-
-  const resizeObserver = new ResizeObserver(() => {
-    if (personalNote.value.trim() == "") {
-      chrome.storage.local.remove(requestID.textContent);
-    } else {
-      chrome.storage.local.set({
-        [requestID.textContent]: {
-          note: personalNote.value,
-          height: personalNote.style.height,
-          width: personalNote.style.width,
-        },
-      });
-    }
-  });
-
-  resizeObserver.observe(personalNote);
-}
-function styleRequestItem(item, index) {
-  item.addEventListener("mouseover", () => {
-    item.style.cursor = "default";
-  });
-  if (index % 2 === 0) {
-    item.style.backgroundColor = "#ffffff";
-  } else {
-    item.style.backgroundColor = "#f0f0f0";
-  }
-}
-async function getRequestNote(requestID) {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(requestID, (result) => {
-      if (!result[requestID]) {
-        resolve(null);
-      } else {
-        resolve(result[requestID]);
-      }
-    });
-  });
 }

@@ -135,7 +135,7 @@ function modifyDescriptionStyle() {
   // descriptionField.classList.remove("description-box");
 
   descriptionField.classList.add("resize-desc");
-  descriptionField.style.maxHeight = descriptionField.scrollHeight + 10 + "px";
+  descriptionField.style.maxHeight = descriptionField.scrollHeight + 15 + "px";
   wrapAndColorEmails(descriptionText);
 }
 function modifySelectClass() {

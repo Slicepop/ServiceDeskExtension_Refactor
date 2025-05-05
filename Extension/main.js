@@ -10,6 +10,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 modifyNavRequestBTN();
 assignMacroReportValue();
+checkExpiredNotes();
 // if (window.location.href.includes("LookupRequest?")) runRequestTab();
 // if you have a request opened
 if (window.location.href.includes("/reports")) clickReportBTN();
