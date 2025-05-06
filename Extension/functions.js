@@ -24,7 +24,8 @@ function checkForRequestPage() {
 }
 function checkForSurveyResultPage() {
   const supportSurveyForm = document.querySelector("#surveyContainerForm");
-  if (supportSurveyForm) supportSurveyForm.target = "_blank";
+  if (!supportSurveyForm) return;
+  supportSurveyForm.target = "_blank";
 }
 function assignMacroReportValue() {
   // checks/sets  if user has selected to automatically go to 'Requests Status by Technician (Closed)' report
