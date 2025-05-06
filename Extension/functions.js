@@ -1,3 +1,14 @@
+function runInitialSetup() {
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "refreshPage") {
+      refreshPage();
+    }
+  });
+
+  modifyNavRequestBTN();
+  assignMacroReportValue();
+  checkExpiredNotes();
+}
 function refreshPage() {
   const refreshBTN = document.querySelector(".reseticon > em");
   if (refreshBTN) refreshBTN.click();
@@ -10,6 +21,10 @@ function checkForRequestPage() {
   );
   if (!requestNum || window.location.href.includes("/LookupRequest")) return;
   window.location.href = `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${requestNum.textContent}`;
+}
+function checkForSurveyResultPage() {
+  const supportSurveyForm = document.querySelector("#surveyContainerForm");
+  if (supportSurveyForm) supportSurveyForm.target = "_blank";
 }
 function assignMacroReportValue() {
   // checks/sets  if user has selected to automatically go to 'Requests Status by Technician (Closed)' report
@@ -135,6 +150,7 @@ function selectBoundsOfCurrWeek() {
     "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(4) > td.fieldtext > select"
   ).selectedIndex = 13;
 }
+
 function modifyNavRequestBTN() {
   // modifies request button at the top to not have woa/wo/9.0.33.7.1.1 at the end of url
   // woa/wo/9.0.33.7.1.1 causes the session to expire eventually

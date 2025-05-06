@@ -2,15 +2,7 @@
  * Refactor for the service desk extension https://github.com/Slicepop/ServiceDeskExtension/
  */
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "refreshPage") {
-    refreshPage();
-  }
-});
-
-modifyNavRequestBTN();
-assignMacroReportValue();
-checkExpiredNotes();
+runInitialSetup();
 // if (window.location.href.includes("LookupRequest?")) runRequestTab();
 // if you have a request opened
 if (window.location.href.includes("/reports")) clickReportBTN();
@@ -27,6 +19,7 @@ else {
       reorderReplyNote();
       updateFilterInputStyle();
       checkForRequestPage();
+      checkForSurveyResultPage();
     }, 10);
   });
 
