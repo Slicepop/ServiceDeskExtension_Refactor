@@ -123,7 +123,7 @@ function modifyDescriptionStyle() {
 
     const wrappedEmails = emails.map((email, index) => {
       const background = index % 2 === 0 ? "#ffffff" : "#f0f0f0";
-      return `<div class="email"   style="background-color: ${background};">${email}</div>`;
+      return `<div class="email"   style="background-color: ${background};">${email}</div> `;
     });
 
     descText.innerHTML = wrappedEmails.join("");
@@ -145,7 +145,7 @@ function modifyDescriptionStyle() {
   // descriptionField.classList.remove("description-box");
 
   descriptionField.classList.add("resize-desc");
-  descriptionField.style.maxHeight = descriptionField.scrollHeight + 15 + "px";
+  descriptionField.style.maxHeight = descriptionField.scrollHeight + 20 + "px";
   wrapAndColorEmails(descriptionText);
 }
 function modifySelectClass() {
