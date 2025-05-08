@@ -1,18 +1,18 @@
 runRequestTab();
+function requestDebounceCalls() {
+  addSaveCloseBTN();
+  changeUserTooltip();
+  modifyDescriptionStyle();
+  modifySelectClass();
+}
 function runRequestTab() {
-  function debounceCalls() {
-    addSaveCloseBTN();
-    changeUserTooltip();
-    modifyDescriptionStyle();
-    modifySelectClass();
-  }
   updateFavicon();
   fetchTitle();
   openNotes();
   let debounceTimeout;
   const observer = new MutationObserver(() => {
     clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(debounceCalls, 10);
+    debounceTimeout = setTimeout(requestDebounceCalls, 10);
   });
 
   observer.observe(document.body, {
@@ -61,7 +61,7 @@ function addSaveCloseBTN() {
     try {
       chrome.runtime.sendMessage({ message: "updateRequest" });
     } catch {}
-    debounceCalls();
+    setTimeout(requestDebounceCalls, 150);
   }
   if (document.querySelector("#Save_Close")) return;
 
@@ -137,7 +137,8 @@ function modifyDescriptionStyle() {
   const descriptionText = document.querySelector("#request-description-text");
 
   if (!descriptionField || !descriptionText) return;
-  if (readMoreBTN) readMoreBTN.click();
+  if (readMoreBTN && readMoreBTN.textContent === "...READ MORE")
+    readMoreBTN.click();
 
   descriptionText.id = "descText";
   // descriptionField.classList.remove("ml-2");
