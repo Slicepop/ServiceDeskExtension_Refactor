@@ -14,13 +14,7 @@ else {
   let debounceTimeout;
   const observer = new MutationObserver(() => {
     clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(() => {
-      replaceLinks();
-      reorderReplyNote();
-      updateFilterInputStyle();
-      checkForRequestPage();
-      checkForSurveyResultPage();
-    }, 10);
+    debounceTimeout = setTimeout(debounceCalls, 10);
   });
 
   observer.observe(document.body, {
