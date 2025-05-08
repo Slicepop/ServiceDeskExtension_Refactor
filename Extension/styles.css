@@ -69,13 +69,13 @@
   min-width: 50px;
   max-width: 32vw;
   outline-width: 0.25px;
-  background-color: rgba(230, 230, 230, 0);
-  outline-color: #63fbf0;
+  background-color: rgba(75, 123, 170, 0.151);
+  outline-color: #2eb3b0;
   border-radius: 5px;
   margin-top: -15px;
   resize: both;
   float: left;
-  color: #8efdfb;
+  color: #2eb3b0;
 }
 #noteBTN {
   scale: 2;
