@@ -50,9 +50,6 @@ async function fetchTitle() {
 
 function addSaveCloseBTN() {
   function handleSaveClose() {
-    try {
-      chrome.runtime.sendMessage({ message: "updateRequest" });
-    } catch {}
     setTimeout(() => {
       window.close();
     }, 800);
