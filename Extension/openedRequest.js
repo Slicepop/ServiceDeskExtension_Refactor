@@ -1,17 +1,18 @@
 runRequestTab();
 function runRequestTab() {
+  function debounceCalls() {
+    addSaveCloseBTN();
+    changeUserTooltip();
+    modifyDescriptionStyle();
+    modifySelectClass();
+  }
   updateFavicon();
   fetchTitle();
   openNotes();
   let debounceTimeout;
   const observer = new MutationObserver(() => {
     clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(() => {
-      addSaveCloseBTN();
-      changeUserTooltip();
-      modifyDescriptionStyle();
-      modifySelectClass();
-    }, 10);
+    debounceTimeout = setTimeout(debounceCalls, 10);
   });
 
   observer.observe(document.body, {
@@ -46,23 +47,31 @@ async function fetchTitle() {
     document.title = data.subject;
   } catch (error) {}
 }
-function handleSave() {
-  try {
-    chrome.runtime.sendMessage({ message: "updateRequest" });
-  } catch {}
-  setTimeout(() => {
-    window.close();
-  }, 800);
-}
+
 function addSaveCloseBTN() {
+  function handleSaveClose() {
+    try {
+      chrome.runtime.sendMessage({ message: "updateRequest" });
+    } catch {}
+    setTimeout(() => {
+      window.close();
+    }, 800);
+  }
+  function handleSave() {
+    try {
+      chrome.runtime.sendMessage({ message: "updateRequest" });
+    } catch {}
+    debounceCalls();
+  }
   if (document.querySelector("#Save_Close")) return;
 
   const SaveClose = document.createElement("p");
   SaveClose.id = "Save_Close";
   SaveClose.textContent = "SAVE\n+\nCLOSE";
   SaveClose.title = "Saves Ticket and Closes Window";
-
-  SaveClose.addEventListener("click", handleSave);
+  const saveBTN = document.querySelector(".general-card-header > button");
+  if (saveBTN) saveBTN.addEventListener("click", handleSave);
+  SaveClose.addEventListener("click", handleSaveClose);
   document
     .querySelector(
       "#request_general_container > div > div.card-header.general-card-header > button"
