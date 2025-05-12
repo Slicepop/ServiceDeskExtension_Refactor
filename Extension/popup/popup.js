@@ -101,7 +101,7 @@ function createLoginPage() {
   } else {
     loginForm.style.backgroundColor = "white";
   }
-  loginForm.style.padding = "20px";
+  loginForm.style.padding = "30px";
   loginForm.style.borderRadius = "5px";
   loginForm.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.5)";
 
@@ -130,6 +130,7 @@ function createLoginPage() {
 
   const loginButton = document.createElement("button");
   loginButton.textContent = "Login";
+  loginButton.id = "loginBTN";
   loginButton.style.width = "100%";
   loginButton.style.padding = "10px";
   loginButton.style.backgroundColor = "#4CAF50";
@@ -141,6 +142,7 @@ function createLoginPage() {
   function handleLogin() {
     username = usernameInput.value;
     password = passwordInput.value;
+
     login();
   }
 
@@ -167,6 +169,8 @@ function hidePage() {
 }
 
 async function login() {
+  const loginBTN = document.querySelector("#loginBTN");
+  loginBTN.style.opacity = "0";
   const storedToken = localStorage.getItem("refreshToken");
 
   const jsonData = {
@@ -189,6 +193,8 @@ async function login() {
       requestOptions
     );
     if (!response.ok) {
+      loginBTN.style.opacity = "1";
+
       const errorMSG = document.createElement("P");
       errorMSG.id = "err";
       errorMSG.textContent =
@@ -391,7 +397,57 @@ function addCopyButton(result) {
     copyUserButton.src = chrome.runtime.getURL("./images/Check.png");
   };
 }
+const button3 = document.querySelector("#myButton3");
+button3.onclick = async function () {
+  try {
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      redirect: "follow",
+    };
+    const response = await fetch(
+      "https://support.wmed.edu/LiveTime/services/v1/user/surveys/",
+      requestOptions
+    );
 
+    if (!response.ok) {
+      refreshToken();
+      searchUser(event);
+      return;
+    }
+
+    const JSONresponse = await response.json();
+    resultsArray = JSONresponse.results;
+    console.log(JSONresponse);
+  } catch (error) {}
+  try {
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      redirect: "follow",
+    };
+    const response = await fetch(
+      "https://support.wmed.edu/LiveTime/services/v1/customer/surveys/40?requestId=105868",
+      requestOptions
+    );
+
+    if (!response.ok) {
+      refreshToken();
+      searchUser(event);
+      return;
+    }
+
+    const JSONresponse = await response.json();
+    resultsArray = JSONresponse.results;
+    console.log(JSONresponse);
+  } catch (error) {}
+};
 const button2 = document.querySelectorAll("#myButton2");
 button2.forEach((button) => {
   button.onclick = function () {
