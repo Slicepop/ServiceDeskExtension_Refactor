@@ -13,6 +13,9 @@ function debounceCalls() {
   }
   function reorderReplyNote() {
     function styleRequestItem(item, index) {
+      // item.querySelector("img").onclick = function () {
+      //   item.remove();
+      // };
       item.addEventListener("mouseover", () => {
         item.style.cursor = "default";
       });
@@ -305,7 +308,7 @@ async function createOrShowHideNote(rowBelow, item) {
   const personalNote = document.createElement("textarea");
   if (NoteDetails) {
     personalNote.value = NoteDetails.note;
-    personalNote.style.width = NoteDetails.width;
+    personalNote.width = NoteDetails.width;
     personalNote.style.height = NoteDetails.height;
   }
   personalNote.id = "personalNote";

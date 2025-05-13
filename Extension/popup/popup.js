@@ -397,57 +397,7 @@ function addCopyButton(result) {
     copyUserButton.src = chrome.runtime.getURL("./images/Check.png");
   };
 }
-const button3 = document.querySelector("#myButton3");
-button3.onclick = async function () {
-  try {
-    const requestOptions = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-      redirect: "follow",
-    };
-    const response = await fetch(
-      "https://support.wmed.edu/LiveTime/services/v1/user/surveys/",
-      requestOptions
-    );
 
-    if (!response.ok) {
-      refreshToken();
-      searchUser(event);
-      return;
-    }
-
-    const JSONresponse = await response.json();
-    resultsArray = JSONresponse.results;
-    console.log(JSONresponse);
-  } catch (error) {}
-  try {
-    const requestOptions = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-      redirect: "follow",
-    };
-    const response = await fetch(
-      "https://support.wmed.edu/LiveTime/services/v1/customer/surveys/40?requestId=105868",
-      requestOptions
-    );
-
-    if (!response.ok) {
-      refreshToken();
-      searchUser(event);
-      return;
-    }
-
-    const JSONresponse = await response.json();
-    resultsArray = JSONresponse.results;
-    console.log(JSONresponse);
-  } catch (error) {}
-};
 const button2 = document.querySelectorAll("#myButton2");
 button2.forEach((button) => {
   button.onclick = function () {
