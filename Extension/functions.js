@@ -13,9 +13,9 @@ function debounceCalls() {
   }
   function reorderReplyNote() {
     function styleRequestItem(item, index) {
-      // item.querySelector("img").onclick = function () {
-      //   item.remove();
-      // };
+      item.querySelector("img").onclick = function () {
+        item.remove();
+      };
       item.addEventListener("mouseover", () => {
         item.style.cursor = "default";
       });
@@ -292,6 +292,17 @@ function selectDefaultView() {
 }
 
 async function createOrShowHideNote(rowBelow, item) {
+  async function getRequestNote(requestID) {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(requestID, (result) => {
+        if (!result[requestID]) {
+          resolve(null);
+        } else {
+          resolve(result[requestID]);
+        }
+      });
+    });
+  }
   const NoteTD = rowBelow.querySelector("td:nth-child(4)");
   if (rowBelow.querySelector("#personalNote")) {
     const personalNote = rowBelow.querySelector("#personalNote");
@@ -308,7 +319,7 @@ async function createOrShowHideNote(rowBelow, item) {
   const personalNote = document.createElement("textarea");
   if (NoteDetails) {
     personalNote.value = NoteDetails.note;
-    personalNote.width = NoteDetails.width;
+    personalNote.style.width = NoteDetails.width;
     personalNote.style.height = NoteDetails.height;
   }
   personalNote.id = "personalNote";
@@ -347,18 +358,6 @@ async function createOrShowHideNote(rowBelow, item) {
   });
 
   resizeObserver.observe(personalNote);
-}
-
-async function getRequestNote(requestID) {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(requestID, (result) => {
-      if (!result[requestID]) {
-        resolve(null);
-      } else {
-        resolve(result[requestID]);
-      }
-    });
-  });
 }
 
 function addToggleablePersonalNotes(item) {
