@@ -204,9 +204,10 @@ function assignMacroReportValue() {
       document.querySelector("#endDateUserTZ").value = formatToMMDDYY(
         days.Friday
       );
-      document.querySelector(
+      const workflowInput = document.querySelector(
         "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(4) > td.fieldtext > select"
-      ).selectedIndex = 13;
+      );
+      workflowInput.selectedIndex = 5;
     }
     addReportFavicon();
     const changeEvent = new Event("change");
@@ -214,8 +215,8 @@ function assignMacroReportValue() {
       "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(1) > td.fieldtext > select"
     );
     if (!reportSelection) return;
-    if (reportSelection.value !== "10") {
-      reportSelection.value = "10";
+    if (reportSelection.value !== "12") {
+      reportSelection.value = "12";
       reportSelection.dispatchEvent(changeEvent);
       return;
     }
