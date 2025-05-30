@@ -57,10 +57,13 @@ try {
   onValue(viewersRef, (snapshot) => {
     const viewers = snapshot.val() || {};
     const names = Object.values(viewers)
+      .filter((user) => user.user !== USERNAME)
       .map((user) => user.FullName)
       .join(", and ");
 
-    displayPresence(names);
+    if (names.trim() !== "") {
+      displayPresence(names);
+    }
   });
 
   function displayPresence(names) {
@@ -69,16 +72,19 @@ try {
       el = document.createElement("p");
       el.id = "ViewTag";
     }
+    el.style.color = "#444444";
     // Split names by ", and " and wrap each in <span style="font-weight: 500">
     const boldNames = names
       .split(", and ")
-      .map((name) => `<span style="font-weight: 500">${name}</span>`)
+      .map(
+        (name) => `<span style="font-weight: 500; color:#07ada1
+ ">${name}</span>`
+      )
       .join(", and ");
     el.innerHTML =
       boldNames.indexOf(", and ") === -1
         ? `👀 ${boldNames} is also viewing this ticket`
         : `👀 ${boldNames} are also viewing this ticket`;
-    el.style.color = "#fff";
     document
       .querySelector("#editRequest > div.section_heading.mt-2.mb-2")
       .appendChild(el);
