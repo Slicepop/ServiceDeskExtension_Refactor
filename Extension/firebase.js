@@ -86,9 +86,9 @@ try {
   onDisconnect(presenceRef)
     .remove()
     .then(() => {
-      // 2️⃣ Then set presence
       set(presenceRef, {
-        name: FULL_NAME,
+        user: USERNAME,
+        FullName: FULL_NAME,
         timestamp: Date.now(),
       });
     });
