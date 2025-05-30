@@ -71,6 +71,7 @@ try {
       el.id = "ViewTag";
     }
     el.style.color = "#444444";
+    el.style.textAlign = "center";
     if (!names || names.trim() === "") {
       el.innerHTML = ""; // No one else is viewing, clear the message
     } else {
