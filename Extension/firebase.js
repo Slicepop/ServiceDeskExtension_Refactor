@@ -61,9 +61,7 @@ try {
       .map((user) => user.FullName)
       .join(", and ");
 
-    if (names.trim() !== "") {
-      displayPresence(names);
-    }
+    displayPresence(names);
   });
 
   function displayPresence(names) {
@@ -73,21 +71,28 @@ try {
       el.id = "ViewTag";
     }
     el.style.color = "#444444";
-    // Split names by ", and " and wrap each in <span style="font-weight: 500">
-    const boldNames = names
-      .split(", and ")
-      .map(
-        (name) => `<span style="font-weight: 500; color:#07ada1
- ">${name}</span>`
-      )
-      .join(", and ");
-    el.innerHTML =
-      boldNames.indexOf(", and ") === -1
-        ? `👀 ${boldNames} is also viewing this ticket`
-        : `👀 ${boldNames} are also viewing this ticket`;
-    document
-      .querySelector("#editRequest > div.section_heading.mt-2.mb-2")
-      .appendChild(el);
+    if (!names || names.trim() === "") {
+      el.innerHTML = ""; // No one else is viewing, clear the message
+    } else {
+      // Split names by ", and " and wrap each in <span style="font-weight: 500">
+      const boldNames = names
+        .split(", and ")
+        .map(
+          (name) =>
+            `<span style="font-weight: 500; color:#07ada1">${name}</span>`
+        )
+        .join(", and ");
+      el.innerHTML =
+        boldNames.indexOf(", and ") === -1
+          ? `👀 ${boldNames} is also viewing this ticket`
+          : `👀 ${boldNames} are also viewing this ticket`;
+    }
+    const container = document.querySelector(
+      "#editRequest > div.section_heading.mt-2.mb-2"
+    );
+    if (container && !el.parentNode) {
+      container.appendChild(el);
+    }
   }
   onDisconnect(presenceRef)
     .remove()
