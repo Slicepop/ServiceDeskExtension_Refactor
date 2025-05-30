@@ -91,7 +91,7 @@ try {
       "#editRequest > div.section_heading.mt-2.mb-2"
     );
     if (container && !el.parentNode) {
-      container.appendChild(el);
+      container.prepend(el);
     }
   }
   onDisconnect(presenceRef)
