@@ -46,7 +46,7 @@ try {
   console.log(USERNAME);
   const presenceRef = ref(db, `presence/${ticketId}/${CLIENT_ID}`);
   await set(presenceRef, {
-    user: USERNAME,
+    clientId: CLIENT_ID,
     FullName: FULL_NAME,
     timestamp: Date.now(),
   });
@@ -57,7 +57,7 @@ try {
   onValue(viewersRef, (snapshot) => {
     const viewers = snapshot.val() || {};
     const names = Object.values(viewers)
-      .filter((user) => user.user !== USERNAME)
+      .filter((user) => user.clientId !== CLIENT_ID)
       .map((user) => user.FullName)
       .join(", and ");
 
@@ -99,7 +99,7 @@ try {
     .remove()
     .then(() => {
       set(presenceRef, {
-        user: USERNAME,
+        clientId: CLIENT_ID,
         FullName: FULL_NAME,
         timestamp: Date.now(),
       });
