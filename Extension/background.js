@@ -17,3 +17,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   }, 800);
 });
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "GET_FIREBASE_KEY") {
+    chrome.storage.local.get(["firebaseKey"], (result) => {
+      sendResponse({ firebaseKey: result.firebaseKey });
+    });
+    return true; // Keeps sendResponse open for async
+  }
+});

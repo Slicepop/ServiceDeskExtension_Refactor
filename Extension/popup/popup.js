@@ -536,3 +536,32 @@ document.addEventListener("DOMContentLoaded", function () {
     toggleDark.src = chrome.runtime.getURL("./images/sun-solid.svg");
   }
 });
+document.getElementById("settingsBtn").onclick = function () {
+  document.getElementById("firebaseModal").style.display = "flex";
+};
+document.getElementById("closeModal").onclick = function () {
+  document.getElementById("firebaseModal").style.display = "none";
+};
+window.onclick = function (event) {
+  if (event.target == document.getElementById("firebaseModal")) {
+    document.getElementById("firebaseModal").style.display = "none";
+  }
+};
+document.getElementById("saveFirebaseKey").onclick = function () {
+  const key = document.getElementById("firebaseKeyInput").value;
+  chrome.storage.local.set({ firebaseKey: key }, function () {
+    console.log("Firebase key saved.");
+  });
+  document.getElementById("firebaseModal").style.display = "none";
+};
+
+// On modal open, load the saved key if it exists
+document.getElementById("settingsBtn").addEventListener("click", function () {
+  chrome.storage.local.get("firebaseKey", function (result) {
+    if (result.firebaseKey) {
+      document.getElementById("firebaseKeyInput").value = result.firebaseKey;
+    } else {
+      document.getElementById("firebaseKeyInput").value = "";
+    }
+  });
+});

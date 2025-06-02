@@ -8,7 +8,11 @@ import {
   onDisconnect,
   onValue,
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
-
+import {
+  getAuth,
+  signInAnonymously,
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 const firebaseConfig = {
   apiKey: "AIzaSyDNV2liFFMknbW_vIk5SsnvFsnRdgEfhDE",
   authDomain: "test-1a7d4.firebaseapp.com",
@@ -24,86 +28,100 @@ const db = getDatabase(app);
 
 // Chrome extension ID: gdggomhjdiocifkeokonihfmmmajflmnS
 const ticketId = new URLSearchParams(window.location.search).get("requestId");
-try {
-  const response = await fetch(
-    `https://support.wmed.edu/LiveTime/services/v1/me`,
-    {
-      headers: {
-        accept: "application/json, text/plain, */*",
-        "zsd-source": "LT",
-      },
-      referrerPolicy: "strict-origin-when-cross-origin",
-      method: "GET",
-      mode: "cors",
-      credentials: "include",
-    }
-  );
-
-  const result = await response.json();
-  const USERNAME = result.username;
-  const CLIENT_ID = result.clientId;
-  const FULL_NAME = result.fullName;
-  console.log(USERNAME);
-  const presenceRef = ref(db, `presence/${ticketId}/${CLIENT_ID}`);
-  await set(presenceRef, {
-    clientId: CLIENT_ID,
-    FullName: FULL_NAME,
-    timestamp: Date.now(),
-  });
-  console.log("✅ Data written");
-
-  // Read test
-  const viewersRef = ref(db, `presence/${ticketId}`);
-  onValue(viewersRef, (snapshot) => {
-    const viewers = snapshot.val() || {};
-    const names = Object.values(viewers)
-      .filter((user) => user.clientId !== CLIENT_ID)
-      .map((user) => user.FullName)
-      .join(", and ");
-
-    displayPresence(names);
+let loggedIn = false;
+const auth = getAuth();
+signInAnonymously(auth)
+  .then(() => {
+    handlePresence();
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // ...
   });
 
-  function displayPresence(names) {
-    let el = document.getElementById("ViewTag");
-    if (!el) {
-      el = document.createElement("p");
-      el.id = "ViewTag";
-    }
-    el.style.color = "#444444";
-    el.style.textAlign = "center";
-    if (!names || names.trim() === "") {
-      el.innerHTML = ""; // No one else is viewing, clear the message
-    } else {
-      // Split names by ", and " and wrap each in <span style="font-weight: 500">
-      const boldNames = names
-        .split(", and ")
-        .map(
-          (name) =>
-            `<span style="font-weight: 500; color:#07ada1">${name}</span>`
-        )
-        .join(", and ");
-      el.innerHTML =
-        boldNames.indexOf(", and ") === -1
-          ? `👀 ${boldNames} is also viewing this ticket`
-          : `👀 ${boldNames} are also viewing this ticket`;
-    }
-    const container = document.querySelector(
-      "#editRequest > div.section_heading.mt-2.mb-2"
+async function handlePresence() {
+  try {
+    const response = await fetch(
+      `https://support.wmed.edu/LiveTime/services/v1/me`,
+      {
+        headers: {
+          accept: "application/json, text/plain, */*",
+          "zsd-source": "LT",
+        },
+        referrerPolicy: "strict-origin-when-cross-origin",
+        method: "GET",
+        mode: "cors",
+        credentials: "include",
+      }
     );
-    if (container && !el.parentNode) {
-      container.prepend(el);
-    }
-  }
-  onDisconnect(presenceRef)
-    .remove()
-    .then(() => {
-      set(presenceRef, {
-        clientId: CLIENT_ID,
-        FullName: FULL_NAME,
-        timestamp: Date.now(),
-      });
+
+    const result = await response.json();
+    const USERNAME = result.username;
+    const CLIENT_ID = auth.currentUser.uid;
+    const FULL_NAME = result.fullName;
+    console.log(USERNAME);
+    const presenceRef = ref(db, `presence/${ticketId}/${CLIENT_ID}`);
+    await set(presenceRef, {
+      clientId: CLIENT_ID,
+      FullName: FULL_NAME,
+      timestamp: Date.now(),
     });
-} catch (error) {
-  console.log(error);
+    console.log("✅ Data written");
+
+    // Read test
+    const viewersRef = ref(db, `presence/${ticketId}`);
+    onValue(viewersRef, (snapshot) => {
+      const viewers = snapshot.val() || {};
+      const names = Object.values(viewers)
+        .filter((user) => user.clientId !== CLIENT_ID)
+        .map((user) => user.FullName)
+        .join(", and ");
+
+      displayPresence(names);
+    });
+
+    function displayPresence(names) {
+      let el = document.getElementById("ViewTag");
+      if (!el) {
+        el = document.createElement("p");
+        el.id = "ViewTag";
+      }
+      el.style.color = "#444444";
+      el.style.textAlign = "center";
+      if (!names || names.trim() === "") {
+        el.innerHTML = ""; // No one else is viewing, clear the message
+      } else {
+        // Split names by ", and " and wrap each in <span style="font-weight: 500">
+        const boldNames = names
+          .split(", and ")
+          .map(
+            (name) =>
+              `<span style="font-weight: 500; color:#07ada1">${name}</span>`
+          )
+          .join(", and ");
+        el.innerHTML =
+          boldNames.indexOf(", and ") === -1
+            ? `👀 ${boldNames} is also viewing this ticket`
+            : `👀 ${boldNames} are also viewing this ticket`;
+      }
+      const container = document.querySelector(
+        "#editRequest > div.section_heading.mt-2.mb-2"
+      );
+      if (container && !el.parentNode) {
+        container.prepend(el);
+      }
+    }
+    onDisconnect(presenceRef)
+      .remove()
+      .then(() => {
+        set(presenceRef, {
+          clientId: CLIENT_ID,
+          FullName: FULL_NAME,
+          timestamp: Date.now(),
+        });
+      });
+  } catch (error) {
+    console.log(error);
+  }
 }

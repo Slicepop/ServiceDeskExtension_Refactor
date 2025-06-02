@@ -454,3 +454,17 @@ function addNoteBTN(item) {
     incidentIcon.parentNode.replaceChild(toggleNote, incidentIcon);
   } catch {}
 }
+window.addEventListener("message", (event) => {
+  if (event.source !== window || event.data.type !== "REQUEST_FIREBASE_KEY")
+    return;
+
+  chrome.runtime.sendMessage({ type: "GET_FIREBASE_KEY" }, (response) => {
+    window.postMessage(
+      {
+        type: "RECEIVE_FIREBASE_KEY",
+        firebaseKey: response?.firebaseKey || null,
+      },
+      "*"
+    );
+  });
+});
