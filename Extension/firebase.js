@@ -102,8 +102,8 @@ async function handlePresence() {
           .join(", and ");
         el.innerHTML =
           boldNames.indexOf(", and ") === -1
-            ? `👀 ${boldNames} is also viewing this ticket`
-            : `👀 ${boldNames} are also viewing this ticket`;
+            ? `<i class="fa fa-users " style="color:#07ada1"></i> ${boldNames} is also viewing this ticket`
+            : `<i class="fa fa-users" style="color:#07ada1"></i> ${boldNames} are also viewing this ticket`;
       }
       const container = document.querySelector(
         "#editRequest > div.section_heading.mt-2.mb-2"
