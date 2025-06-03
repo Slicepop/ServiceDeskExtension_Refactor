@@ -26,6 +26,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+let darkreaderActive = false;
+if (window.DarkReader && typeof window.DarkReader.isEnabled === "function") {
+  darkreaderActive = window.DarkReader.isEnabled();
+} else if (
+  document.querySelector('meta[name="darkreader"]') ||
+  document.querySelector("style#dark-reader-style")
+) {
+  darkreaderActive = true;
+}
+
 // Chrome extension ID: gdggomhjdiocifkeokonihfmmmajflmnS
 const ticketId = new URLSearchParams(window.location.search).get("requestId");
 let loggedIn = false;
@@ -102,7 +112,11 @@ async function handlePresence() {
           .join(", and ");
         el.innerHTML =
           boldNames.indexOf(", and ") === -1
-            ? `<i class="fa fa-users " style="color:#07ada1"></i> ${boldNames} is also viewing this ticket`
+            ? `${
+                darkreaderActive === true
+                  ? '<i class="fa fa-user darkMode"></i>'
+                  : `<i class="fa fa-user lightMode"></i>`
+              } ${boldNames} is also viewing this ticket`
             : `<i class="fa fa-users" style="color:#07ada1"></i> ${boldNames} are also viewing this ticket`;
       }
       const container = document.querySelector(

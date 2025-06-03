@@ -25,7 +25,8 @@
         "firebase.js",
         "styles.css",
         "images/report.png",
-        "images/request.ico"
+        "images/request.ico",
+        "userStyle.css"
       ],
       "matches": ["https://support.wmed.edu/*"]
     }
