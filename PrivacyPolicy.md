@@ -1,6 +1,6 @@
 # Privacy Policy for Service Desk Extension
 
-**Effective Date:** [Insert Date]
+**Effective Date:** [06/03/25]
 
 Western Michigan University Homer Stryker M.D. School of Medicine ("we", "our", or "us") has developed the **Service Desk Extension** ("extension") to enhance the user experience within our internal service request interface. This privacy policy outlines how we collect, use, and protect data through the extension.
 
