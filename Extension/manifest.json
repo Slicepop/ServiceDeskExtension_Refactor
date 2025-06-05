@@ -8,7 +8,7 @@
     "128": "images/icon128.png"
   },
 
-  "permissions": ["activeTab", "offscreen", "storage"],
+  "permissions": ["storage"],
   "background": {
     "service_worker": "background.js"
   },

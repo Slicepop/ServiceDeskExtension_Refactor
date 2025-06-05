@@ -3,16 +3,15 @@ import {
   getDatabase,
   ref,
   set,
-  get,
-  remove,
   onDisconnect,
   onValue,
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 import {
   getAuth,
-  signInAnonymously,
+  signInWithCustomToken,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyDNV2liFFMknbW_vIk5SsnvFsnRdgEfhDE",
   authDomain: "test-1a7d4.firebaseapp.com",
@@ -23,8 +22,12 @@ const firebaseConfig = {
   appId: "1:509430067696:web:f28e1f4c6d21ab32776d35",
   measurementId: "G-PNVVZD749V",
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
+
+const ticketId = new URLSearchParams(window.location.search).get("requestId");
 
 let darkreaderActive = false;
 if (window.DarkReader && typeof window.DarkReader.isEnabled === "function") {
@@ -36,21 +39,8 @@ if (window.DarkReader && typeof window.DarkReader.isEnabled === "function") {
   darkreaderActive = true;
 }
 
-// Chrome extension ID: gdggomhjdiocifkeokonihfmmmajflmnS
-const ticketId = new URLSearchParams(window.location.search).get("requestId");
-let loggedIn = false;
-const auth = getAuth();
-signInAnonymously(auth)
-  .then(() => {
-    handlePresence();
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // ...
-  });
-
-async function handlePresence() {
+// Fetch user info from /me endpoint
+async function fetchUserInfo() {
   try {
     const response = await fetch(
       `https://support.wmed.edu/LiveTime/services/v1/me`,
@@ -65,21 +55,55 @@ async function handlePresence() {
         credentials: "include",
       }
     );
-
+    if (!response.ok)
+      throw new Error(`Failed fetching /me: ${response.status}`);
     const result = await response.json();
-    const USERNAME = result.username;
-    const CLIENT_ID = auth.currentUser.uid;
-    const FULL_NAME = result.fullName;
-    console.log(USERNAME);
+    return result; // Expect { username, fullName, clientId? }
+  } catch (error) {
+    console.error("Failed to fetch user info:", error);
+    throw error;
+  }
+}
+
+// Fetch Firebase custom token from your backend using clientID
+async function fetchCustomToken(clientID) {
+  try {
+    const response = await fetch(
+      "https://w1fxzn8yp9.execute-api.us-east-2.amazonaws.com/PROD/SupplyFireBaseAuth",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientID }),
+      }
+    );
+    if (!response.ok)
+      throw new Error(`Failed fetching custom token: ${response.status}`);
+    const data = await response.json();
+    if (data && data.token) {
+      return data.token;
+    } else {
+      throw new Error("No token received from backend");
+    }
+  } catch (err) {
+    console.error("Failed to fetch custom token:", err);
+    throw err;
+  }
+}
+
+// Handle presence in Firebase Realtime Database
+async function handlePresence(user, fullName) {
+  try {
+    const CLIENT_ID = user.uid;
+
     const presenceRef = ref(db, `presence/${ticketId}/${CLIENT_ID}`);
     await set(presenceRef, {
       clientId: CLIENT_ID,
-      FullName: FULL_NAME,
+      FullName: fullName,
       timestamp: Date.now(),
     });
-    console.log("✅ Data written");
 
-    // Read test
+    onDisconnect(presenceRef).remove();
+
     const viewersRef = ref(db, `presence/${ticketId}`);
     onValue(viewersRef, (snapshot) => {
       const viewers = snapshot.val() || {};
@@ -100,9 +124,8 @@ async function handlePresence() {
       el.style.color = "#444444";
       el.style.textAlign = "center";
       if (!names || names.trim() === "") {
-        el.innerHTML = ""; // No one else is viewing, clear the message
+        el.innerHTML = ""; // No one else viewing
       } else {
-        // Split names by ", and " and wrap each in <span style="font-weight: 500">
         const boldNames = names
           .split(", and ")
           .map(
@@ -110,6 +133,7 @@ async function handlePresence() {
               `<span style="font-weight: 500; color:#07ada1">${name}</span>`
           )
           .join(", and ");
+
         el.innerHTML =
           boldNames.indexOf(", and ") === -1
             ? `${
@@ -126,16 +150,31 @@ async function handlePresence() {
         container.prepend(el);
       }
     }
-    onDisconnect(presenceRef)
-      .remove()
-      .then(() => {
-        set(presenceRef, {
-          clientId: CLIENT_ID,
-          FullName: FULL_NAME,
-          timestamp: Date.now(),
-        });
-      });
   } catch (error) {
-    console.log(error);
+    console.error("Error handling presence:", error);
   }
 }
+
+// Main async IIFE to orchestrate auth and presence flow
+(async function main() {
+  try {
+    const userInfo = await fetchUserInfo();
+    const CLIENT_ID = userInfo.clientId || userInfo.username || null;
+    if (!CLIENT_ID) throw new Error("No client ID found in /me response");
+
+    const customToken = await fetchCustomToken(CLIENT_ID);
+
+    await signInWithCustomToken(auth, customToken);
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Signed in with custom token:", user.uid);
+        handlePresence(user, userInfo.fullName);
+      } else {
+        console.log("User signed out");
+      }
+    });
+  } catch (err) {
+    console.error("Authentication or initialization failed:", err);
+  }
+})();
