@@ -221,22 +221,44 @@ async function handlePresence(user, fullName) {
 }
 
 // Main async IIFE to orchestrate auth and presence flow
+// Optimized main function
 (async function main() {
+  let cachedUserInfo = null;
+
   try {
-    const userInfo = await fetchUserInfo();
-    const CLIENT_ID = userInfo.clientId || userInfo.username || null;
-    if (!CLIENT_ID) throw new Error("No client ID found in /me response");
+    // Try loading from sessionStorage
+    const cachedClientId = sessionStorage.getItem("clientId");
+    const cachedFullName = sessionStorage.getItem("fullName");
 
-    const customToken = await fetchCustomToken(CLIENT_ID);
+    if (cachedClientId && cachedFullName) {
+      cachedUserInfo = { clientId: cachedClientId, fullName: cachedFullName };
+    }
 
-    await signInWithCustomToken(auth, customToken);
-
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
-        console.log("Signed in with custom token:", user.uid);
-        handlePresence(user, userInfo.fullName);
+        console.log("Already signed in:", user.uid);
+
+        // Use cached userInfo or fetch if not present
+        if (!cachedUserInfo) {
+          cachedUserInfo = await fetchUserInfo();
+          sessionStorage.setItem("clientId", cachedUserInfo.clientId);
+          sessionStorage.setItem("fullName", cachedUserInfo.fullName);
+        }
+
+        handlePresence(user, cachedUserInfo.fullName);
       } else {
-        console.log("User signed out");
+        if (!cachedUserInfo) {
+          cachedUserInfo = await fetchUserInfo();
+          sessionStorage.setItem("clientId", cachedUserInfo.clientId);
+          sessionStorage.setItem("fullName", cachedUserInfo.fullName);
+        }
+
+        const CLIENT_ID = cachedUserInfo.clientId || cachedUserInfo.username;
+        if (!CLIENT_ID) throw new Error("No client ID found in /me response");
+
+        const customToken = await fetchCustomToken(CLIENT_ID);
+        await signInWithCustomToken(auth, customToken);
+        // onAuthStateChanged will re-trigger with current user
       }
     });
   } catch (err) {
