@@ -146,13 +146,7 @@ async function handlePresence(user, fullName) {
         user-select: none;
       }
 
-      #ViewTag.presence-banner:hover {
-        background: linear-gradient(90deg, ${
-          darkreaderActive ? "#1a1d22" : "#d2f5f2"
-        } 0%, ${darkreaderActive ? "#23272e" : "#e8f7f6"} 100%);
-        color: ${darkreaderActive ? "#fff" : "#111"};
-        box-shadow: 0 6px 24px 0 rgba(7,173,161,0.18), 0 2px 8px 0 rgba(0,0,0,0.04);
-      }
+    
 
       .viewer-name {
         font-weight: 600;
@@ -167,13 +161,7 @@ async function handlePresence(user, fullName) {
         display: inline-block;
       }
 
-      .viewer-name:hover {
-        background: ${
-          darkreaderActive ? "rgba(7,173,161,0.22)" : "rgba(7,173,161,0.19)"
-        };
-        color: #048c7e;
-        cursor: pointer;
-      }
+      
 
       .viewer-icon {
         margin-right: 8px;
