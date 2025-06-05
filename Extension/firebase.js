@@ -114,35 +114,112 @@ async function handlePresence(user, fullName) {
 
       displayPresence(names);
     });
+    function injectPresenceStyles() {
+      if (document.getElementById("presence-style")) return;
+
+      const style = document.createElement("style");
+      style.id = "presence-style";
+      style.textContent = `
+      @keyframes subtleFadeIn {
+        from { opacity: 0; transform: translateY(-8px);}
+        to { opacity: 1; transform: translateY(0);}
+      }
+
+      #ViewTag.presence-banner {
+        background: linear-gradient(90deg, ${
+          darkreaderActive ? "#23272e" : "#e8f7f6"
+        } 0%, ${darkreaderActive ? "#1a1d22" : "#fafdfe"} 100%);
+        color: ${darkreaderActive ? "#e0e0e0" : "#222"};
+        border-left: 5px solid #07ada1;
+        border-right: 1px solid ${darkreaderActive ? "#222" : "#e0f7f7"};
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        text-align: left;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 18px 0 rgba(7,173,161,0.09), 0 1.5px 4px 0 rgba(0,0,0,0.03);
+        animation: subtleFadeIn 0.7s cubic-bezier(.4,1.4,.6,1) 1;
+        transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+        z-index: 1000;
+        position: relative;
+        user-select: none;
+      }
+
+      #ViewTag.presence-banner:hover {
+        background: linear-gradient(90deg, ${
+          darkreaderActive ? "#1a1d22" : "#d2f5f2"
+        } 0%, ${darkreaderActive ? "#23272e" : "#e8f7f6"} 100%);
+        color: ${darkreaderActive ? "#fff" : "#111"};
+        box-shadow: 0 6px 24px 0 rgba(7,173,161,0.18), 0 2px 8px 0 rgba(0,0,0,0.04);
+      }
+
+      .viewer-name {
+        font-weight: 600;
+        color: #07ada1;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: ${
+          darkreaderActive ? "rgba(7,173,161,0.13)" : "rgba(7,173,161,0.11)"
+        };
+        margin: 0 2px;
+        transition: background 0.18s, color 0.18s;
+        display: inline-block;
+      }
+
+      .viewer-name:hover {
+        background: ${
+          darkreaderActive ? "rgba(7,173,161,0.22)" : "rgba(7,173,161,0.19)"
+        };
+        color: #048c7e;
+        cursor: pointer;
+      }
+
+      .viewer-icon {
+        margin-right: 8px;
+        color: #07ada1;
+        font-size: 1.15em;
+        vertical-align: middle;
+        filter: drop-shadow(0 1px 1px rgba(7,173,161,0.08));
+      }
+    `;
+      document.head.appendChild(style);
+    }
 
     function displayPresence(names) {
+      injectPresenceStyles();
+
       let el = document.getElementById("ViewTag");
       if (!el) {
-        el = document.createElement("p");
+        el = document.createElement("div");
         el.id = "ViewTag";
+        el.className = "presence-banner";
       }
-      el.style.color = "#444444";
-      el.style.textAlign = "center";
+
       if (!names || names.trim() === "") {
-        el.innerHTML = ""; // No one else viewing
+        el.innerHTML = "";
+        el.style.display = "none";
       } else {
-        const boldNames = names
+        const formattedNames = names
           .split(", and ")
-          .map(
-            (name) =>
-              `<span style="font-weight: 500; color:#07ada1">${name}</span>`
-          )
+          .map((name) => `<span class="viewer-name">${name}</span>`)
           .join(", and ");
 
-        el.innerHTML =
-          boldNames.indexOf(", and ") === -1
-            ? `${
-                darkreaderActive === true
-                  ? '<i class="fa fa-user darkMode"></i>'
-                  : `<i class="fa fa-user lightMode"></i>`
-              } ${boldNames} is also viewing this ticket`
-            : `<i class="fa fa-users" style="color:#07ada1"></i> ${boldNames} are also viewing this ticket`;
+        const isMultiple = names.includes(", and ");
+        const icon = isMultiple
+          ? '<i class="fa fa-users viewer-icon"></i>'
+          : darkreaderActive === true
+          ? '<i class="fa fa-user darkMode"></i>'
+          : `<i class="fa fa-user lightMode"></i>`;
+
+        el.innerHTML = `
+      ${icon} ${formattedNames} ${
+          isMultiple ? "are" : "is"
+        } also viewing this ticket
+    `;
+        el.style.display = "block";
       }
+
       const container = document.querySelector(
         "#editRequest > div.section_heading.mt-2.mb-2"
       );
