@@ -271,7 +271,7 @@ async function searchUser(event) {
   try {
     const response = await fetch(
       "https://support.wmed.edu/LiveTime/services/v1/user/client/findusers?internalOnly=true&clientTypes=8&searchTerm=" +
-        encodeURIComponent(searchTerm) +
+        encodeURIComponent(searchTerm.trim()) +
         "&offset=0&limit=10&locale=en-US",
       requestOptions
     );
