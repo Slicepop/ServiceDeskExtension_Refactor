@@ -166,8 +166,17 @@ function modifySelectClass() {
   });
 }
 function openNotes() {
-  const noteDiv = document.querySelector(".requestnote-card-header");
-  if (!noteDiv && noteDiv.dataset.processed) return;
-  noteDiv.dataset.processed = true;
-  noteDiv.click();
+  setTimeout(() => {
+    const noteDiv = document.querySelector(".requestnote-card-header");
+    if (!noteDiv) return;
+    const match = noteDiv.textContent.match(/NOTES\s*\((\d+)\)/);
+
+    if (match) {
+      const number = parseInt(match[1], 10);
+      if (number == 0) return;
+    }
+    if (noteDiv.dataset.processed) return;
+    noteDiv.dataset.processed = true;
+    noteDiv.click();
+  }, 10);
 }
