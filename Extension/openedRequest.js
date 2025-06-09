@@ -178,5 +178,5 @@ function openNotes() {
     if (noteDiv.dataset.processed) return;
     noteDiv.dataset.processed = true;
     noteDiv.click();
-  }, 10);
+  }, 100);
 }
