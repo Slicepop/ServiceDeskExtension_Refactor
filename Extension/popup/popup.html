@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
 <link rel="stylesheet" type="text/css" href="popup.css" />
 <html lang="en">
   <img id = "theme-toggle"></img>
   <body class>
-    <!-- <button id="theme-toggle">Dark Mode</button>  src = "./sun-solid.svg-->
-    <button class="settings" title="Settings" id="settingsBtn">
-      <i class="fa-solid fa-gear"></i>  
- </button>
+
      <div id="lines">
       <div id="searchAndCopy">
         <input id="search" placeholder="Search User" type="text" />
@@ -16,27 +12,16 @@
         <div id="resultBox"></div>
       <input id="subjectLine" placeholder="General Description" type="text" />
     </div>
-    <div id="buttons"></div>
+    <div id="buttons">
       <button id="myButton2" title="Create Phone Call Ticket">Phone Call</button>
       <button id="myButton2" title="Create Walk Up Ticket">Walk-Up</button>
       <button id="myButton2" title="Create Teams Ticket">Teams Message</button>
     </div>
 
-    <!-- Modal for Firebase Key -->
-    <div id="firebaseModal" class="modal" style="display:none;">
-      <div class="modal-content">
-      <span class="close" id="closeModal">&times;</span>
-      <h2>Enter Firebase Key</h2>
-      <input type="text" id="firebaseKeyInput" placeholder="Firebase Key" />
-      <button id="saveFirebaseKey">Save</button>
-      </div>
-    </div>
     <style>
       
     </style>
-    <script>
-
-    </script>
+ 
     <script src="popup.js"></script>
   </body>
 </html>

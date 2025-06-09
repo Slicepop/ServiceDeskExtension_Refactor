@@ -54,31 +54,6 @@ async function checkAuth() {
     return false;
   }
 }
-// if (authorized == false) {
-//   console.log("FALSEEEE");
-//   setTimeout(() => {
-// fetch("https://support.wmed.edu/LiveTime/services/v1/auth/tokens", {
-//   method: "POST",
-//   headers: {
-//     "Content-Type": "application/json",
-//     Authorization: localStorage.getItem("refreshToken"),
-//   },
-// })
-//       .then((response) => response.json())
-//       .then((data) => {
-//         if (data && data.token) {
-//           localStorage.setItem("authToken", data.token);
-//           localStorage.setItem("refreshToken", data.refreshToken);
-//           console.log("New token received and stored:", data.token);
-//         } else {
-//           createLoginPage();
-//         }
-//       })
-//       .catch((error) => {
-//         createLoginPage();
-//       });
-//   }, 2000);
-// }
 
 function createLoginPage() {
   const loginOverlay = document.createElement("div");
@@ -232,33 +207,35 @@ subjectline.addEventListener("input", function (event) {
   localStorage.setItem("subject", event.target.value);
   subject = event.target.value;
 });
+
 const searchItem = document.querySelector("#search");
-const lastSearch = localStorage.getItem("lastSearch");
-if (lastSearch) {
-  searchItem.value = lastSearch;
-  const inputEvent = new Event("input");
-  searchItem.dispatchEvent(inputEvent);
-}
-let debounceTimeout;
-searchItem.addEventListener("input", function (event) {
-  clearTimeout(debounceTimeout);
-  debounceTimeout = setTimeout(async function () {
-    localStorage.setItem("lastSearch", event.target.value);
-    searchUser(event);
-  }, 500);
-});
 let currentIndex = -1; // Tracks the currently highlighted result
 let resultsArray = []; // Stores fetched results
 let navigatingWithKeys = false; // Tracks if you're navigating via keys
 
-// Trigger search when the search input changes.
-document.getElementById("search").addEventListener("input", searchUser);
+// Debounce wrapper for searchUser
+function debounce(fn, delay) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
 
 async function searchUser(event) {
   // If you're navigating with keys, skip updating the search.
   if (navigatingWithKeys) return;
 
   const searchTerm = event.target.value;
+  // If the search term is empty, clear results and stop
+  if (searchTerm.trim() === "") {
+    const resultContainer = document.querySelector("#resultBox");
+    resultContainer.innerHTML = "";
+    resultsArray = [];
+    currentIndex = -1;
+    return;
+  }
+
   const requestOptions = {
     method: "GET",
     headers: {
@@ -277,8 +254,13 @@ async function searchUser(event) {
     );
 
     if (!response.ok) {
-      refreshToken();
-      searchUser(event);
+      // If the token is invalid, attempt to refresh and then retry the search
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        searchUser(event); // Retry the search after successful token refresh
+      } else {
+        createLoginPage(); // If refresh failed, show login page
+      }
       return;
     }
 
@@ -287,27 +269,48 @@ async function searchUser(event) {
     const resultContainer = document.querySelector("#resultBox");
     resultContainer.innerHTML = "";
 
-    resultsArray.forEach((result, index) => {
-      const resultItem = document.createElement("p");
-      resultItem.className = "result";
-      resultItem.textContent = result.fullName;
-      resultItem.style.cursor = "pointer";
+    if (resultsArray.length === 0) {
+      resultContainer.innerHTML = "<p>No results found</p>";
+    } else {
+      resultsArray.forEach((result, index) => {
+        const resultItem = document.createElement("p");
+        resultItem.className = "result";
+        resultItem.textContent = result.fullName;
+        resultItem.style.cursor = "pointer";
 
-      // Click selection – when a result is clicked, select the user.
-      resultItem.onclick = function () {
-        selectUser(result);
-      };
+        // Click selection – when a result is clicked, select the user.
+        resultItem.onclick = function () {
+          selectUser(result);
+        };
 
-      resultContainer.appendChild(resultItem);
-    });
+        resultContainer.appendChild(resultItem);
+      });
+    }
 
     // Reset highlighted index.
     currentIndex = -1;
   } catch (error) {
     const resultContainer = document.querySelector("#resultBox");
-    resultContainer.innerHTML = "<p>No results found</p>";
+    resultContainer.innerHTML = "<p>Error fetching results</p>";
     console.error("Error fetching users:", error);
   }
+}
+
+const debouncedSearchUser = debounce(searchUser, 300); // Increased debounce time slightly
+
+// Attach the *single* input event listener
+searchItem.addEventListener("input", function (event) {
+  localStorage.setItem("lastSearch", event.target.value); // Save immediately
+  debouncedSearchUser(event);
+});
+
+// Load and trigger search if there's a last search
+const lastSearch = localStorage.getItem("lastSearch");
+if (lastSearch) {
+  searchItem.value = lastSearch;
+  // Manually call the debounced search. We don't need to dispatch an event.
+  // We need to create a mock event object for searchUser to work correctly.
+  debouncedSearchUser({ target: searchItem });
 }
 
 // Keyboard Navigation for the search input.
@@ -315,7 +318,7 @@ document.getElementById("search").addEventListener("keydown", function (event) {
   const resultItems = document.querySelectorAll("#resultBox .result");
 
   // If there are no results and Tab is pressed, allow default behavior
-  if (resultItems.length === 0 && event.key === "Tab") {
+  if (resultsArray.length === 0 && event.key === "Tab") {
     return; // Let the browser handle it
   }
 
@@ -351,7 +354,12 @@ document.getElementById("search").addEventListener("keydown", function (event) {
 
 // Allow normal typing by resetting the navigation flag for keys that are not navigation.
 document.getElementById("search").addEventListener("keyup", function (event) {
-  if (!["Tab", "ArrowDown", "ArrowUp", " "].includes(event.key)) {
+  // Only reset if a *typing* key is pressed and not a navigation key
+  if (
+    event.key.length === 1 || // Is it a printable character?
+    event.key === "Backspace" ||
+    event.key === "Delete"
+  ) {
     navigatingWithKeys = false;
   }
 });
@@ -374,10 +382,17 @@ function updateHighlight(resultItems) {
 function selectUser(result) {
   const searchInput = document.getElementById("search");
   searchInput.value = result.fullName;
-  searchInput.dispatchEvent(new Event("input"));
+  // We no longer need to dispatch 'input' here because the value is set
+  // and the search box is cleared.
+  // searchInput.dispatchEvent(new Event("input"));
   localStorage.setItem("clientId", result.clientId);
   localStorage.setItem("lastSearch", result.fullName);
   addCopyButton(result);
+
+  // Clear the search results box
+  document.querySelector("#resultBox").innerHTML = "";
+  resultsArray = []; // Clear the array as well
+  currentIndex = -1; // Reset highlight
 
   // Automatically focus the subject line after selection.
   document.getElementById("subjectLine").focus();
@@ -395,6 +410,10 @@ function addCopyButton(result) {
   copyUserButton.onclick = function () {
     navigator.clipboard.writeText(result.userName);
     copyUserButton.src = chrome.runtime.getURL("./images/Check.png");
+    setTimeout(() => {
+      // Reset the icon after a short delay
+      copyUserButton.src = chrome.runtime.getURL("./images/Copy.png");
+    }, 1500); // 1.5 seconds
   };
 }
 
@@ -407,6 +426,14 @@ button2.forEach((button) => {
       localStorage.removeItem("subject");
       localStorage.removeItem("lastSearch");
       localStorage.removeItem("clientId");
+      // Clear the input fields visually
+      document.querySelector("#search").value = "";
+      document.querySelector("#subjectLine").value = "";
+      // Remove the copy button
+      const copyButton = document.querySelector("#copyButton");
+      if (copyButton) {
+        copyButton.remove();
+      }
 
       switch (button.textContent) {
         case "Phone Call":
@@ -427,12 +454,25 @@ button2.forEach((button) => {
       warning.textContent =
         "There was an issue creating the ticket, Please double check your values and submit again.";
       warning.style.color = "red";
+      warning.id = "submissionWarning"; // Add an ID to easily remove it
+      // Ensure only one warning message is present
+      const existingWarning = document.querySelector("#submissionWarning");
+      if (existingWarning) {
+        existingWarning.remove();
+      }
       document.body.appendChild(warning);
+      // Remove the warning after a few seconds
+      setTimeout(() => {
+        if (document.querySelector("#submissionWarning")) {
+          document.querySelector("#submissionWarning").remove();
+        }
+      }, 5000); // 5 seconds
     }
   };
 });
 
 async function createQuickCall(subject, clientId, itemId) {
+  let index;
   switch (itemId) {
     case 277657:
       subject = "Phone Call - " + subject;
@@ -455,7 +495,7 @@ async function createQuickCall(subject, clientId, itemId) {
     clientId: clientId,
     subject: subject,
     itemId: itemId,
-    classfication: 54,
+    classfication: 54, // Make sure this is a valid classification ID
     source: "WIDGET",
   });
 
@@ -480,26 +520,81 @@ async function createQuickCall(subject, clientId, itemId) {
       requestOptions
     );
     if (!response.ok) {
-      refreshToken();
-      createQuickCall(subject, clientId, itemId);
-      return;
+      // If unauthorized, try to refresh token and retry.
+      // If the status is 401, it means token is invalid.
+      if (response.status === 401) {
+        const refreshed = await refreshToken();
+        if (refreshed) {
+          // Retry the request after successful token refresh
+          await createQuickCall(subject, clientId, itemId);
+        } else {
+          // If refresh failed, display login page
+          createLoginPage();
+        }
+      } else {
+        // Handle other HTTP errors
+        console.error(
+          `Error creating quick call: ${response.status} ${response.statusText}`
+        );
+        const errorText = await response.text();
+        console.error("Response body:", errorText);
+        // Display a user-friendly error message
+        const warning = document.createElement("p");
+        warning.textContent = `Failed to create ticket: ${response.statusText}. Please try again or contact support.`;
+        warning.style.color = "red";
+        warning.id = "creationError";
+        const existingError = document.querySelector("#creationError");
+        if (existingError) {
+          existingError.remove();
+        }
+        document.body.appendChild(warning);
+        setTimeout(() => {
+          if (document.querySelector("#creationError")) {
+            document.querySelector("#creationError").remove();
+          }
+        }, 5000);
+      }
+      return; // Stop further execution in this try block if not ok
     }
     const result = await response.json();
     console.log(result);
 
     const requestIdDiv = document.createElement("div");
     requestIdDiv.innerHTML = `<p style="display: inline;">Incident Created ID: </p><a href="https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${result.requestId}" target="_blank">${result.requestId}</a>`;
-    document.body.appendChild(requestIdDiv);
-    setTimeout(() => {
-      window.close();
-    }, 3000);
-  } catch (error) {
-    if (error.message.includes("401")) {
-      refreshToken();
-      createQuickCall(subject, clientId, itemId);
-    } else {
-      console.error("Error:", error.message);
+
+    // Remove any previous incident ID messages
+    const existingRequestIdDiv = document.querySelector("#incidentIdMessage");
+    if (existingRequestIdDiv) {
+      existingRequestIdDiv.remove();
     }
+    requestIdDiv.id = "incidentIdMessage"; // Add ID for easier removal
+    document.body.appendChild(requestIdDiv);
+
+    // Hide the incident ID message after a delay and close the window
+    setTimeout(() => {
+      if (document.querySelector("#incidentIdMessage")) {
+        document.querySelector("#incidentIdMessage").remove();
+      }
+      window.close();
+    }, 3000); // Hide message after 3 seconds and then close
+  } catch (error) {
+    console.error("Network or parsing error:", error.message);
+    // Display a network error message
+    const warning = document.createElement("p");
+    warning.textContent =
+      "Network error, please check your connection and try again.";
+    warning.style.color = "red";
+    warning.id = "networkError";
+    const existingError = document.querySelector("#networkError");
+    if (existingError) {
+      existingError.remove();
+    }
+    document.body.appendChild(warning);
+    setTimeout(() => {
+      if (document.querySelector("#networkError")) {
+        document.querySelector("#networkError").remove();
+      }
+    }, 5000);
   }
 }
 const toggleDark = document.querySelector("#theme-toggle");
@@ -535,33 +630,4 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     toggleDark.src = chrome.runtime.getURL("./images/sun-solid.svg");
   }
-});
-document.getElementById("settingsBtn").onclick = function () {
-  document.getElementById("firebaseModal").style.display = "flex";
-};
-document.getElementById("closeModal").onclick = function () {
-  document.getElementById("firebaseModal").style.display = "none";
-};
-window.onclick = function (event) {
-  if (event.target == document.getElementById("firebaseModal")) {
-    document.getElementById("firebaseModal").style.display = "none";
-  }
-};
-document.getElementById("saveFirebaseKey").onclick = function () {
-  const key = document.getElementById("firebaseKeyInput").value;
-  chrome.storage.local.set({ firebaseKey: key }, function () {
-    console.log("Firebase key saved.");
-  });
-  document.getElementById("firebaseModal").style.display = "none";
-};
-
-// On modal open, load the saved key if it exists
-document.getElementById("settingsBtn").addEventListener("click", function () {
-  chrome.storage.local.get("firebaseKey", function (result) {
-    if (result.firebaseKey) {
-      document.getElementById("firebaseKeyInput").value = result.firebaseKey;
-    } else {
-      document.getElementById("firebaseKeyInput").value = "";
-    }
-  });
 });
