@@ -28,17 +28,18 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 const ticketId = new URLSearchParams(window.location.search).get("requestId");
-
-let darkreaderActive = false;
-if (window.DarkReader && typeof window.DarkReader.isEnabled === "function") {
-  darkreaderActive = window.DarkReader.isEnabled();
-} else if (
-  document.querySelector('meta[name="darkreader"]') ||
-  document.querySelector("style#dark-reader-style")
-) {
-  darkreaderActive = true;
+let darkreaderActive = setTimeout(isDarkReaderActive, 100);
+function isDarkReaderActive() {
+  if (window.DarkReader && typeof window.DarkReader.isEnabled === "function") {
+    return window.DarkReader.isEnabled();
+  } else if (
+    document.querySelector('meta[name="darkreader"]') ||
+    document.querySelector("style#dark-reader-style")
+  ) {
+    return true;
+  }
+  return false;
 }
-
 // Fetch user info from /me endpoint
 async function fetchUserInfo() {
   try {
@@ -90,38 +91,19 @@ async function fetchCustomToken(clientID) {
   }
 }
 
-// Handle presence in Firebase Realtime Database
-async function handlePresence(user, fullName) {
-  try {
-    const CLIENT_ID = user.uid;
+function injectPresenceStyles(darkreaderActiveProp) {
+  if (darkreaderActiveProp == darkreaderActive) {
+    return;
+  }
+  darkreaderActive = darkreaderActiveProp;
 
-    const presenceRef = ref(db, `presence/${ticketId}/${CLIENT_ID}`);
-    await set(presenceRef, {
-      clientId: CLIENT_ID,
-      FullName: fullName,
-      timestamp: Date.now(),
-    });
+  let style = document.getElementById("presence-style");
+  if (!style) {
+    style = document.createElement("style");
+    style.id = "presence-style";
+  }
 
-    onDisconnect(presenceRef).remove();
-
-    const viewersRef = ref(db, `presence/${ticketId}`);
-    onValue(viewersRef, (snapshot) => {
-      const viewers = snapshot.val() || {};
-      const names = Object.values(viewers)
-        .filter((user) => user.clientId !== CLIENT_ID)
-        .map((user) => user.FullName)
-        .join(", and ");
-
-      displayPresence(names);
-    });
-
-    function displayPresence(names) {
-      function injectPresenceStyles() {
-        if (document.getElementById("presence-style")) return;
-
-        const style = document.createElement("style");
-        style.id = "presence-style";
-        style.textContent = `
+  style.textContent = `
         @keyframes subtleFadeIn {
           from { opacity: 0; transform: translateY(-8px);}
           to { opacity: 1; transform: translateY(0);}
@@ -173,10 +155,35 @@ async function handlePresence(user, fullName) {
           filter: drop-shadow(0 1px 1px rgba(7,173,161,0.08));
         }
       `;
-        document.head.appendChild(style);
-      }
+  document.head.appendChild(style);
+}
+// Handle presence in Firebase Realtime Database
+async function handlePresence(user, fullName) {
+  try {
+    const CLIENT_ID = user.uid;
 
-      injectPresenceStyles();
+    const presenceRef = ref(db, `presence/${ticketId}/${CLIENT_ID}`);
+    await set(presenceRef, {
+      clientId: CLIENT_ID,
+      FullName: fullName,
+      timestamp: Date.now(),
+    });
+
+    onDisconnect(presenceRef).remove();
+
+    const viewersRef = ref(db, `presence/${ticketId}`);
+    onValue(viewersRef, (snapshot) => {
+      const viewers = snapshot.val() || {};
+      const names = Object.values(viewers)
+        .filter((user) => user.clientId !== CLIENT_ID)
+        .map((user) => user.FullName)
+        .join(", and ");
+
+      displayPresence(names);
+    });
+
+    function displayPresence(names) {
+      injectPresenceStyles(isDarkReaderActive());
 
       let el = document.getElementById("ViewTag");
       if (!el) {
@@ -223,7 +230,7 @@ async function handlePresence(user, fullName) {
 
 // Main async IIFE to orchestrate auth and presence flow
 // Optimized main function
-(async function main() {
+async function main() {
   let cachedUserInfo = null;
 
   try {
@@ -265,40 +272,22 @@ async function handlePresence(user, fullName) {
   } catch (err) {
     console.error("Authentication or initialization failed:", err);
   }
-})();
+}
+main();
 // Observer to detect Dark Reader changes
 const darkModeObserver = new MutationObserver(() => {
-  const isDarkNow =
-    window.DarkReader?.isEnabled?.() ||
-    !!document.querySelector("style#dark-reader-style") ||
-    !!document.querySelector('meta[name="darkreader"]');
-
-  if (isDarkNow !== darkreaderActive) {
-    darkreaderActive = isDarkNow;
-
-    // Remove old styles and banner to trigger re-render
-    document.getElementById("presence-style")?.remove();
-    document.getElementById("ViewTag")?.remove();
-
-    // Trigger refresh by resetting the listeners
-    // (will re-call injectPresenceStyles and displayPresence via Firebase onValue)
-    const viewersRef = ref(db, `presence/${ticketId}`);
-    onValue(viewersRef, (snapshot) => {
-      const viewers = snapshot.val() || {};
-      const names = Object.values(viewers)
-        .filter((user) => user.clientId !== auth.currentUser?.uid)
-        .map((user) => user.FullName)
-        .join(", and ");
-
-      const dummyUser = { uid: auth.currentUser?.uid };
-      handlePresence(dummyUser, sessionStorage.getItem("fullName") || ""); // reuse full name
-    });
+  if (darkreaderActive != isDarkReaderActive()) {
+    // injectPresenceStyles(isDarkReaderActive());
+    main();
+    console.log(isDarkReaderActive());
   }
 });
 
 // Watch for DOM mutations that might indicate dark mode toggle
-darkModeObserver.observe(document.documentElement, {
-  attributes: true,
-  childList: true,
-  subtree: true,
-});
+setTimeout(() => {
+  darkModeObserver.observe(document.documentElement, {
+    attributes: true,
+    childList: true,
+    subtree: true,
+  });
+}, 500);
