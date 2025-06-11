@@ -114,13 +114,6 @@ function changeUserTooltip() {
   });
 }
 function modifyDescriptionStyle() {
-  String.prototype.insert = function (index, string) {
-    if (index > 0) {
-      return this.substring(0, index) + string + this.substring(index);
-    }
-    return string + this;
-  };
-
   function wrapAndColorEmails(descText) {
     const content = descText.innerHTML;
     const emails = content.split(/(?=From:)/g);
@@ -140,6 +133,11 @@ function modifyDescriptionStyle() {
   );
   const descriptionText = document.querySelector("#request-description-text");
 
+  const tab = document.querySelector("#myTabContent");
+  if (tab) {
+    tab.id = "myContent";
+    tab.style.paddingRight = "15px";
+  }
   if (!descriptionField || !descriptionText) return;
   if (readMoreBTN && readMoreBTN.textContent === "...READ MORE")
     readMoreBTN.click();
