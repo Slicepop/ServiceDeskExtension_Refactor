@@ -83,6 +83,21 @@ function addSaveCloseBTN() {
     .appendChild(SaveClose);
 }
 function changeUserTooltip() {
+  function addDirectoryLink(userTooltipInfo) {
+    const infoSpan = userTooltipInfo.querySelector("span");
+    if (!infoSpan) return;
+    const userInfo = infoSpan.querySelector("label:nth-child(1)");
+    if (!userInfo) return;
+    const user = userInfo.textContent.replace("Username: ", "").trim();
+    if (user === "sys") return;
+    const directoryLink = document.createElement("a");
+    directoryLink.href = `https://portal.wmed.edu/cdprofile?eid=${user}`;
+    infoSpan.append(document.createElement("br"));
+    directoryLink.textContent = "Open User in Directory";
+    directoryLink.target = "_blank";
+    document.querySelector("#tooltip_info > span").append(directoryLink);
+  }
+
   if (document.querySelector("#newI_Tag")) return;
 
   const userI_Tag = document.querySelector(
@@ -96,6 +111,8 @@ function changeUserTooltip() {
   userI_Tag.parentNode.replaceChild(newI_Tag, userI_Tag);
 
   const userTooltipInfo = document.querySelector("#tooltip_info");
+  if (!userTooltipInfo) return;
+  addDirectoryLink(userTooltipInfo);
   newI_Tag.addEventListener("click", () => {
     if (!userTooltipInfo.classList.contains("tooltipShown")) {
       userTooltipInfo.classList.add("tooltipShown");
