@@ -196,12 +196,24 @@ async function handlePresence(user, fullName) {
         el.innerHTML = "";
         el.style.display = "none";
       } else {
-        const formattedNames = names
-          .split(", and ")
-          .map((name) => `<span class="viewer-name">${name}</span>`)
-          .join(", and ");
+        const nameArray = names.split(", and ").filter(Boolean);
+        const formattedNames = nameArray.map(
+          (name) => `<span class="viewer-name">${name}</span>`
+        );
 
-        const isMultiple = names.includes(", and ");
+        let finalNamesString = "";
+        if (formattedNames.length === 1) {
+          finalNamesString = formattedNames[0];
+        } else if (formattedNames.length === 2) {
+          finalNamesString = `${formattedNames[0]} and ${formattedNames[1]}`;
+        } else {
+          finalNamesString =
+            formattedNames.slice(0, -1).join(", ") +
+            ", and " +
+            formattedNames.slice(-1);
+        }
+
+        const isMultiple = formattedNames.length > 1;
         const icon = isMultiple
           ? '<i class="fa fa-users viewer-icon"></i>'
           : darkreaderActive === true
@@ -209,7 +221,7 @@ async function handlePresence(user, fullName) {
           : `<i class="fa fa-user lightMode"></i>`;
 
         el.innerHTML = `
-      ${icon} ${formattedNames} ${
+      ${icon} ${finalNamesString} ${
           isMultiple ? "are" : "is"
         } also viewing this ticket
     `;
