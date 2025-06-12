@@ -95,7 +95,7 @@ function changeUserTooltip() {
     infoSpan.append(document.createElement("br"));
     directoryLink.textContent = "Open User in Directory";
     directoryLink.target = "_blank";
-    document.querySelector("#tooltip_info > span").append(directoryLink);
+    infoSpan.append(directoryLink);
   }
 
   if (document.querySelector("#newI_Tag")) return;
