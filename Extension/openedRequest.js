@@ -89,8 +89,13 @@ function changeUserTooltip() {
     const userInfo = infoSpan.querySelector("label:nth-child(1)");
     if (!userInfo) return;
     const user = userInfo.textContent.replace("Username: ", "").trim();
+    console.log(userInfo.textContent, user);
     if (user === "sys") return;
-    const directoryLink = document.createElement("a");
+    let directoryLink = document.querySelector("#directoryLink");
+    if (!directoryLink) {
+      directoryLink = document.createElement("a");
+      directoryLink.id = "directoryLink";
+    }
     directoryLink.href = `https://portal.wmed.edu/cdprofile?eid=${user}`;
     infoSpan.append(document.createElement("br"));
     directoryLink.textContent = "Open User in Directory";
@@ -164,7 +169,11 @@ function modifyDescriptionStyle() {
   // descriptionField.classList.remove("description-box");
 
   descriptionField.classList.add("resize-desc");
-  descriptionField.style.maxHeight = descriptionField.scrollHeight + 20 + "px";
+  requestAnimationFrame(() => {
+    const buffer = 20;
+    descriptionField.style.maxHeight =
+      descriptionField.scrollHeight + buffer + "px";
+  });
   wrapAndColorEmails(descriptionText);
 }
 function modifySelectClass() {

@@ -59,6 +59,7 @@ i.fa-user.darkMode {
 }
 .resize-desc {
   resize: vertical;
+  overflow: auto;
   min-height: 80px;
   max-height: none;
   height: 300px;
