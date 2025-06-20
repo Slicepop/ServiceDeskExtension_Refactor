@@ -56,6 +56,7 @@ async function fetchTitle() {
 }
 
 function addSaveCloseBTN() {
+  if (document.querySelector("#Save_Close")) return;
   function handleSaveClose() {
     setTimeout(() => {
       window.close();
@@ -67,20 +68,17 @@ function addSaveCloseBTN() {
     } catch {}
     setTimeout(requestDebounceCalls, 150);
   }
-  if (document.querySelector("#Save_Close")) return;
 
-  const SaveClose = document.createElement("p");
-  SaveClose.id = "Save_Close";
-  SaveClose.textContent = "SAVE\n+\nCLOSE";
-  SaveClose.title = "Saves Ticket and Closes Window";
   const saveBTN = document.querySelector(".general-card-header > button");
-  if (saveBTN) saveBTN.addEventListener("click", handleSave);
-  SaveClose.addEventListener("click", handleSaveClose);
-  document
-    .querySelector(
-      "#request_general_container > div > div.card-header.general-card-header > button"
-    )
-    .appendChild(SaveClose);
+  if (saveBTN) {
+    const SaveClose = document.createElement("p");
+    SaveClose.id = "Save_Close";
+    SaveClose.textContent = "SAVE\n+\nCLOSE";
+    SaveClose.title = "Saves Ticket and Closes Window";
+    saveBTN.addEventListener("click", handleSave);
+    SaveClose.addEventListener("click", handleSaveClose);
+    saveBTN.appendChild(SaveClose);
+  }
 }
 function changeUserTooltip() {
   function addDirectoryLink(userTooltipInfo) {
