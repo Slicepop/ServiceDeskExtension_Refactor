@@ -1,3 +1,10 @@
+const script = document.createElement("script");
+script.src = chrome.runtime.getURL("firebase.js");
+script.type = "module";
+script.onload = function () {
+  this.remove();
+};
+(document.head || document.documentElement).appendChild(script);
 runRequestTab();
 function requestDebounceCalls() {
   addSaveCloseBTN();
@@ -49,6 +56,7 @@ async function fetchTitle() {
 }
 
 function addSaveCloseBTN() {
+  if (document.querySelector("#Save_Close")) return;
   function handleSaveClose() {
     setTimeout(() => {
       window.close();
@@ -60,22 +68,39 @@ function addSaveCloseBTN() {
     } catch {}
     setTimeout(requestDebounceCalls, 150);
   }
-  if (document.querySelector("#Save_Close")) return;
 
-  const SaveClose = document.createElement("p");
-  SaveClose.id = "Save_Close";
-  SaveClose.textContent = "SAVE\n+\nCLOSE";
-  SaveClose.title = "Saves Ticket and Closes Window";
   const saveBTN = document.querySelector(".general-card-header > button");
-  if (saveBTN) saveBTN.addEventListener("click", handleSave);
-  SaveClose.addEventListener("click", handleSaveClose);
-  document
-    .querySelector(
-      "#request_general_container > div > div.card-header.general-card-header > button"
-    )
-    .appendChild(SaveClose);
+  if (saveBTN) {
+    const SaveClose = document.createElement("p");
+    SaveClose.id = "Save_Close";
+    SaveClose.textContent = "SAVE\n+\nCLOSE";
+    SaveClose.title = "Saves Ticket and Closes Window";
+    saveBTN.addEventListener("click", handleSave);
+    SaveClose.addEventListener("click", handleSaveClose);
+    saveBTN.appendChild(SaveClose);
+  }
 }
 function changeUserTooltip() {
+  function addDirectoryLink(userTooltipInfo) {
+    const infoSpan = userTooltipInfo.querySelector("span");
+    if (!infoSpan) return;
+    const userInfo = infoSpan.querySelector("label:nth-child(1)");
+    if (!userInfo) return;
+    const user = userInfo.textContent.replace("Username: ", "").trim();
+    console.log(userInfo.textContent, user);
+    if (user === "sys") return;
+    let directoryLink = document.querySelector("#directoryLink");
+    if (!directoryLink) {
+      directoryLink = document.createElement("a");
+      directoryLink.id = "directoryLink";
+    }
+    directoryLink.href = `https://portal.wmed.edu/cdprofile?eid=${user}`;
+    infoSpan.append(document.createElement("br"));
+    directoryLink.textContent = "Open User in Directory";
+    directoryLink.target = "_blank";
+    infoSpan.append(directoryLink);
+  }
+
   if (document.querySelector("#newI_Tag")) return;
 
   const userI_Tag = document.querySelector(
@@ -89,6 +114,8 @@ function changeUserTooltip() {
   userI_Tag.parentNode.replaceChild(newI_Tag, userI_Tag);
 
   const userTooltipInfo = document.querySelector("#tooltip_info");
+  if (!userTooltipInfo) return;
+  addDirectoryLink(userTooltipInfo);
   newI_Tag.addEventListener("click", () => {
     if (!userTooltipInfo.classList.contains("tooltipShown")) {
       userTooltipInfo.classList.add("tooltipShown");
@@ -107,13 +134,6 @@ function changeUserTooltip() {
   });
 }
 function modifyDescriptionStyle() {
-  String.prototype.insert = function (index, string) {
-    if (index > 0) {
-      return this.substring(0, index) + string + this.substring(index);
-    }
-    return string + this;
-  };
-
   function wrapAndColorEmails(descText) {
     const content = descText.innerHTML;
     const emails = content.split(/(?=From:)/g);
@@ -133,6 +153,11 @@ function modifyDescriptionStyle() {
   );
   const descriptionText = document.querySelector("#request-description-text");
 
+  const tab = document.querySelector("#myTabContent");
+  if (tab) {
+    tab.id = "myContent";
+    tab.style.paddingRight = "15px";
+  }
   if (!descriptionField || !descriptionText) return;
   if (readMoreBTN && readMoreBTN.textContent === "...READ MORE")
     readMoreBTN.click();
@@ -142,7 +167,11 @@ function modifyDescriptionStyle() {
   // descriptionField.classList.remove("description-box");
 
   descriptionField.classList.add("resize-desc");
-  descriptionField.style.maxHeight = descriptionField.scrollHeight + 20 + "px";
+  requestAnimationFrame(() => {
+    const buffer = 20;
+    descriptionField.style.maxHeight =
+      descriptionField.scrollHeight + buffer + "px";
+  });
   wrapAndColorEmails(descriptionText);
 }
 function modifySelectClass() {
@@ -159,8 +188,17 @@ function modifySelectClass() {
   });
 }
 function openNotes() {
-  const noteDiv = document.querySelector(".requestnote-card-header");
-  if (!noteDiv && noteDiv.dataset.processed) return;
-  noteDiv.dataset.processed = true;
-  noteDiv.click();
+  setTimeout(() => {
+    const noteDiv = document.querySelector(".requestnote-card-header");
+    if (!noteDiv) return;
+    const match = noteDiv.textContent.match(/NOTES\s*\((\d+)\)/);
+
+    if (match) {
+      const number = parseInt(match[1], 10);
+      if (number == 0) return;
+    }
+    if (noteDiv.dataset.processed) return;
+    noteDiv.dataset.processed = true;
+    noteDiv.click();
+  }, 100);
 }

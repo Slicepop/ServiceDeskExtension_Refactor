@@ -30,6 +30,13 @@
 #tooltip_info > span > label {
   cursor: text;
 }
+i.fa-user.lightMode {
+  color: #07ada1 !important;
+}
+i.fa-user.darkMode {
+  color: #78fffc !important;
+}
+
 /* descriptionDiv */
 /* #descText {
   min-height: 80px;
@@ -52,6 +59,7 @@
 }
 .resize-desc {
   resize: vertical;
+  overflow: auto;
   min-height: 80px;
   max-height: none;
   height: 300px;

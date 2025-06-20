@@ -1,7 +1,7 @@
 html {
   border-radius: 25px;
   width: 376px;
-  height: 100px;
+  height: 120px;
 }
 
 body {
@@ -65,6 +65,7 @@ input {
   padding-bottom: 50px;
   max-width: fit-content;
 }
+
 #subjectLine {
   margin-top: 10px;
   margin-bottom: 10px;
