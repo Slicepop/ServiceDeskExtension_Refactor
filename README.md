@@ -56,7 +56,7 @@ Improvements to the main Service Desk request list view for better organization 
 
 Specialized features for navigating and viewing reports.
 
--   **Custom Favicon**: Changes the browser tab's favicon to a unique "alien icon" when on a reports page, providing a clear visual cue in your browser tabs.
+-   **Custom Favicon**: Changes the browser tab's favicon to a unique "report icon" when on a reports page, providing a clear visual cue in your browser tabs.
 -   **Automated Technician Report View**:
     -   An optional feature (controlled by a checkbox on the "Technician Reports" page).
     -   If enabled, when you navigate to the "KPI" report, it will automatically redirect you to the "Requests Status by Technician (Closed)" report.
