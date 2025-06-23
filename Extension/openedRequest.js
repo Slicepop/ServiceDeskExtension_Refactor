@@ -58,7 +58,9 @@ async function fetchTitle() {
 function addSaveCloseBTN() {
   if (document.querySelector("#Save_Close")) return;
   function handleSaveClose() {
+    console.log("start close timer");
     setTimeout(() => {
+      console.log("initiate Close");
       window.close();
     }, 800);
   }
@@ -76,7 +78,10 @@ function addSaveCloseBTN() {
     SaveClose.textContent = "SAVE\n+\nCLOSE";
     SaveClose.title = "Saves Ticket and Closes Window";
     saveBTN.addEventListener("click", handleSave);
-    SaveClose.addEventListener("click", handleSaveClose);
+    SaveClose.addEventListener("click", () => {
+      console.log("SaveClose Clicked");
+      handleSaveClose();
+    });
     saveBTN.appendChild(SaveClose);
   }
 }
@@ -115,7 +120,9 @@ function changeUserTooltip() {
 
   const userTooltipInfo = document.querySelector("#tooltip_info");
   if (!userTooltipInfo) return;
-  addDirectoryLink(userTooltipInfo);
+  setTimeout(() => {
+    addDirectoryLink(userTooltipInfo);
+  }, 500);
   newI_Tag.addEventListener("click", () => {
     if (!userTooltipInfo.classList.contains("tooltipShown")) {
       userTooltipInfo.classList.add("tooltipShown");
