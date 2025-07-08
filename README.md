@@ -1,58 +1,56 @@
 **[Click here to head to the Chrome Web Store and install!](https://chromewebstore.google.com/detail/ngclhnocakhkdieeecnieijcponodabm?authuser=0&hl=en)**
 
-## 1. ExtensionRequests List Page Enhancements
-
-Features designed to improve navigation and management of requests on the main list view.
-
-*   **Default List Selection**: The page will default to the "Unassigned" list if it contains one or more requests.
-*   **Alternate Row Colors**: Rows will display with alternating background colors to improve scannability and visual separation of individual requests.
-*   **Open Links in New Tab**: Links to individual requests will be modified to open in a new browser tab, preserving the current list view.
-*   **Remove Non-Clickable Pointer Cursor**: The pointer cursor will be removed on hover for items within rows that are not interactive, preventing user confusion.
-*   **Private Note Toggle**: The standard "Incident" icon will be replaced with a toggleable "Private Note" feature. These notes are stored in the extension's local storage and are persistent (will not clear with browser cache).
-*   **Resizable Filter Lists & Apply on Enter**: Lists within the filter section (e.g., status, technician) will be made resizable. Additionally, pressing "Enter" within these lists will trigger the "Apply" action for the filters.
-*   **Improved Navigation Bar Request Link**: The "Requests" link in the navigation bar will be updated to `https://support.wmed.edu/LiveTime/WebObjects/LiveTime` to mitigate common session expiration issues.
+# LiveTime Extension Features
 
 ---
 
-## 2. Opened Request Page Enhancements
+## Requests List Page
 
-Features focused on improving the experience when viewing and working on an individual request.
-
-*   **Dynamic Tab Title & Favicon**: The browser tab's title will be changed from "Service Manager" to the subject of the opened request. The favicon will also be updated to a document icon for easier identification.
-*   **Live Presence Indicator**: A banner will appear at the top of the request page stating `[Tech's Full Name] is also viewing this ticket` if other technicians (who also have this extension installed) are simultaneously viewing the same request. This banner automatically disappears when no other technicians are present.
-*   **Automatic "Read More"**: The "Read More" link within the request's description will be automatically clicked on page load, expanding the full description.
-*   **Resizable Description Div**: The division containing the request description will be made resizable, offering greater flexibility and reducing the need for the LiveTime fullscreen button.
-*   **Automatic Notes Section Open**: If an opened request contains any existing notes, the notes section will automatically expand upon page load.
-*   **"Save + Close" Button**: A new "Save + Close" button will be added. Upon clicking, it will save the current request, then close the tab after a short delay to ensure the save operation completes. It will also send a message to any open "Requests List" tabs to refresh their view, reflecting any changes made.
-*   **Persistent Customer Info Button**: The transient customer info tooltip (the "i" icon next to the customer field in the "General" section) will be replaced with a static info button. Clicking this button will display the customer's information, which will remain open until clicked off.
-*   **WMed Directory Profile Link**: Within the customer information section (displayed via the persistent info button), a direct link to the user's profile in the WMed Directory will be added. This link will not appear for "System User" accounts.
-*   **Alternate Colors in Select Lists**: Dropdown and select lists (e.g., for assigning technicians) will display alternating row colors for improved readability.
+*   **Default to Unassigned list**: If there is > 0 in the list.
+*   **Alternate row colors**: To improve scannability and visual separation.
+*   **Modify links to open in new tab**: For requests.
+*   **Remove Pointer cursor on hover**: For non-clickable items in rows.
+*   **Replace Incident icon with Private Note**: A toggleable private note stored in the extension's local storage (this will not clear when you clear cache).
+*   **Resizable filter lists & Enter to apply**: Change lists in the filter section to be resizable and allow enter in the lists to hit apply.
+*   **Change Nav bar Requests link**: To `https://support.wmed.edu/LiveTime/WebObjects/LiveTime` in order to remove some of the session expiration issues.
 
 ---
 
-## 3. Report "Macro"
+## Opened Request Page
 
-A feature that automates access and pre-fills the "Incidents Status by Technician (Closed)" report.
-
-*   **Macro Activation Checkbox**: A checkbox will be visible on the Technician report page. Enabling this checkbox activates the report macro.
-*   **Bookmark Redirection**: When the macro is enabled, bookmarking `https://support.wmed.edu/LiveTime/WebObjects/LiveTime/reports` (which normally leads to a broken page) will instead redirect to the technician reports and automatically select the "Incidents Status by Technician (Closed)" report.
-*   **Automatic Report Pre-fill**: Upon reaching the "Incidents Status by Technician (Closed)" report, the start and end dates for the report will be automatically populated to cover one work week. Additionally, the "IT Support Workflow" will be pre-selected.
+*   **Modify tab's title and favicon**: The tab's title will be the subject of the request from "Service Manager" and the favicon will change to a document icon.
+*   **Add Live Presence**: If there are any other technicians (who also have this extension installed), a banner at the top of the request will show stating "[tech's full name] is also viewing this ticket". This will automatically remove itself when there are no other techs looking at the request.
+*   **Automatically click "Read More"**: In the request's description.
+*   **Resizable description div**: Modify the div that holds the description to be resizable (these 2 have completely removed my use of the Fullscreen button).
+*   **Automatically open notes section on load**: If there were any on the request.
+*   **Add "Save + Close" button**: That saves the request then closes the tab on a delay to ensure saving, then sends a message to any tab on the Requests List page to refresh the list to catch any modifications you may have had.
+*   **Replace customer info tooltip with info button**: The "i" icon next to the customer field in the "General" section will be replaced with an info button that stays open unless clicked off.
+*   **Add WMed Directory profile link**: Inside the information section that shows when the info button is clicked - this will not show if the user is System User.
+*   **Alternate colors in select lists**: For example, the list to select a technician to send the request to.
 
 ---
 
-## 4. Extension Popup (Quick Call Creation Tool)
+## Report "Macro"
 
-A standalone tool accessible by clicking the extension's icon, designed for rapid call creation.
+If you navigate to the Technician report, you will see a checkbox; this enables the macro.
 
-*   **SSO Login Requirement**: This tool requires users to log in with their WMed SSO credentials to function.
-*   **Streamlined Quick Call Creation**: Facilitates faster creation of common quick call types: "Phone Call," "Walkup," and "Teams Message."
-*   **Two Input Fields**:
-    *   The first field allows searching for the user the request is about, automatically assigning them as the customer in the ticket.
-    *   The second field is for the "General Description," which forms the subject of the ticket, formatted as `[Quick Call Type] - [General Description]`.
-*   **Automated Ticket Creation & Link**: Clicking one of the three quick call type buttons will immediately create a new request. A direct link to the newly created request will then appear in the popup, which will close after a brief delay.
-*   **Dark Mode Support**: The popup interface includes a dark mode theme, activated by clicking the sun icon located in the top-right corner.
+When enabled:
+*   **Bookmark redirection**: You can bookmark `https://support.wmed.edu/LiveTime/WebObjects/LiveTime/reports` which normally returns a broken page; it will redirect to the technician reports and select the "Incidents Status by Technician (Closed)" report.
+*   **Automatic report pre-fill**: Once you get to the "Incidents Status by Technician (Closed)", the start date and end date for the report will be filled out for one work week and select the IT support Workflow.
 
-  
+---
+
+## Extension Popup (Click the Extension's Icon)
+
+### Quick Call Creation Tool
+
+*   **Requires SSO login**: You must login with your SSO login.
+*   **Allows quick call creation**: This tool allows you to create quick calls (Phone Call, Walkup, Teams Message) faster.
+*   **Two input fields**:
+    *   The first field is to search for the user the request is about (this assigns the user as the customer in the ticket).
+    *   The second is the "General Description" (the subject in the ticket which formats as `[quick call type] - [General Description]`).
+*   **Automated call creation and link**: Once you click one of the 3 buttons that determines the quick call type, a quick call will be created and a link to the request, once created, will be added to the popup, then close after a delay.
+*   **Dark mode enabled**: Simply click the sun icon in the top right to change the theme.
 If you run into any issues, please let me know!
 <br>
 <br>
