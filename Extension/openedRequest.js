@@ -55,18 +55,19 @@ async function fetchTitle() {
   } catch (error) {}
 }
 
+function updateRequest() {
+  try {
+    console.log("testUpdateRequest");
+    chrome.runtime.sendMessage({ message: "updateRequest" });
+  } catch {}
+  setTimeout(requestDebounceCalls, 150);
+}
 function addSaveCloseBTN() {
   if (document.querySelector("#Save_Close")) return;
   function handleSaveClose() {
     setTimeout(() => {
       window.close();
     }, 800);
-  }
-  function handleSave() {
-    try {
-      chrome.runtime.sendMessage({ message: "updateRequest" });
-    } catch {}
-    setTimeout(requestDebounceCalls, 150);
   }
 
   const saveBTN = document.querySelector(".general-card-header > button");
@@ -75,7 +76,7 @@ function addSaveCloseBTN() {
     SaveClose.id = "Save_Close";
     SaveClose.textContent = "SAVE\n+\nCLOSE";
     SaveClose.title = "Saves Ticket and Closes Window";
-    saveBTN.addEventListener("click", handleSave);
+    saveBTN.addEventListener("click", updateRequest);
     SaveClose.addEventListener("click", handleSaveClose);
     saveBTN.appendChild(SaveClose);
   }

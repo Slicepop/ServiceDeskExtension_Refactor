@@ -145,7 +145,16 @@ function injectPresenceStyles(darkreaderActiveProp) {
           display: inline-block;
         }
   
-        
+        .viewer-name.viewer-warn {
+          background: ${darkreaderActive ? "#5f550014" : "#fceba1"};
+          color: ${darkreaderActive ? "#e9c863" : "#b18100"};
+        }
+
+        .viewer-name.viewer-stale {
+            background: ${darkreaderActive ? "#4b4b4b" : "#e0e0e0"};
+            color: ${darkreaderActive ? "#999" : "#666"};
+         }
+
   
         .viewer-icon {
           margin-right: 8px;
@@ -157,8 +166,31 @@ function injectPresenceStyles(darkreaderActiveProp) {
       `;
   document.head.appendChild(style);
 }
+setInterval(() => {
+  const tags = document.querySelectorAll(".viewer-name");
+  tags.forEach((tag) => {
+    const ts = parseInt(tag.dataset.timestamp, 10);
+    const mins = Math.floor((Date.now() - ts) / 60000);
+    tag.classList.remove("viewer-fresh", "viewer-warn", "viewer-stale");
+
+    if (mins >= 120) tag.classList.add("viewer-stale");
+    else if (mins >= 45) tag.classList.add("viewer-warn");
+    else tag.classList.add("viewer-fresh");
+  });
+}, 60000); // every minute
+
 // Handle presence in Firebase Realtime Database
 async function handlePresence(user, fullName) {
+  function formatTimeAgo(elapsedMs) {
+    const secondsAgo = Math.floor(elapsedMs / 1000);
+    if (secondsAgo < 60)
+      return `${secondsAgo} second${secondsAgo !== 1 ? "s" : ""} ago`;
+    const minutes = Math.floor(secondsAgo / 60);
+    if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+  }
+
   try {
     const CLIENT_ID = user.uid;
 
@@ -179,10 +211,10 @@ async function handlePresence(user, fullName) {
         .map((user) => user.FullName)
         .join(", and ");
 
-      displayPresence(names);
+      displayPresence(names, viewers);
     });
 
-    function displayPresence(names) {
+    function displayPresence(names, viewers) {
       injectPresenceStyles(isDarkReaderActive());
 
       let el = document.getElementById("ViewTag");
@@ -196,10 +228,31 @@ async function handlePresence(user, fullName) {
         el.innerHTML = "";
         el.style.display = "none";
       } else {
-        const nameArray = names.split(", and ").filter(Boolean);
-        const formattedNames = nameArray.map(
-          (name) => `<span class="viewer-name">${name}</span>`
-        );
+        const filteredViewers = Object.values(viewers)
+          .filter((user) => user.clientId !== CLIENT_ID)
+          .sort((a, b) => a.timestamp - b.timestamp);
+
+        const formattedNames = filteredViewers.map((viewer) => {
+          const isSelf = viewer.clientId === CLIENT_ID;
+          const label = isSelf ? "You" : viewer.FullName;
+          const elapsedMs = Date.now() - viewer.timestamp;
+          const elapsedMin = Math.floor(elapsedMs / 60000);
+
+          let statusClass = "viewer-fresh"; // default teal
+          if (elapsedMin >= 120) {
+            statusClass = "viewer-stale"; // gray
+          } else if (elapsedMin >= 45) {
+            statusClass = "viewer-warn"; // yellow
+          }
+
+          return `<span 
+    class="viewer-name ${statusClass}" 
+    data-timestamp="${viewer.timestamp}" 
+    data-self="${isSelf ? "true" : "false"}"
+    title="Joined... (loading)">
+    ${label}
+  </span>`;
+        });
 
         let finalNamesString = "";
         if (formattedNames.length === 1) {
@@ -227,10 +280,18 @@ async function handlePresence(user, fullName) {
     `;
         el.style.display = "block";
       }
+      const viewerTags = el.querySelectorAll(".viewer-name");
+      viewerTags.forEach((tag) => {
+        tag.addEventListener("mouseenter", () => {
+          const ts = parseInt(tag.getAttribute("data-timestamp"), 10);
+          if (!isNaN(ts)) {
+            const timeAgo = formatTimeAgo(Date.now() - ts);
+            tag.title = `Opened ${timeAgo}`;
+          }
+        });
+      });
 
-      const container = document.querySelector(
-        "#editRequest > div.section_heading.mt-2.mb-2"
-      );
+      const container = document.querySelector("#content");
       if (container && !el.parentNode) {
         container.prepend(el);
       }
