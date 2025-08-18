@@ -116,23 +116,25 @@ function changeUserTooltip() {
 
   const userTooltipInfo = document.querySelector("#tooltip_info");
   if (!userTooltipInfo) return;
-  addDirectoryLink(userTooltipInfo);
-  newI_Tag.addEventListener("click", () => {
-    if (!userTooltipInfo.classList.contains("tooltipShown")) {
-      userTooltipInfo.classList.add("tooltipShown");
-      document.addEventListener("click", function handler(event) {
-        if (
-          !newI_Tag.contains(event.target) &&
-          !userTooltipInfo.contains(event.target)
-        ) {
-          userTooltipInfo.classList.remove("tooltipShown");
-          document.removeEventListener("click", handler);
-        }
-      });
-    } else {
-      userTooltipInfo.classList.remove("tooltipShown");
-    }
-  });
+  setTimeout(() => {
+    addDirectoryLink(userTooltipInfo);
+    newI_Tag.addEventListener("click", () => {
+      if (!userTooltipInfo.classList.contains("tooltipShown")) {
+        userTooltipInfo.classList.add("tooltipShown");
+        document.addEventListener("click", function handler(event) {
+          if (
+            !newI_Tag.contains(event.target) &&
+            !userTooltipInfo.contains(event.target)
+          ) {
+            userTooltipInfo.classList.remove("tooltipShown");
+            document.removeEventListener("click", handler);
+          }
+        });
+      } else {
+        userTooltipInfo.classList.remove("tooltipShown");
+      }
+    });
+  }, 200);
 }
 function modifyDescriptionStyle() {
   function wrapAndColorEmails(descText) {
