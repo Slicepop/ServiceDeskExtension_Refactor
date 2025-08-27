@@ -146,11 +146,10 @@ function hidePage() {
 async function login() {
   const loginBTN = document.querySelector("#loginBTN");
   loginBTN.style.opacity = "0";
-  const storedToken = localStorage.getItem("refreshToken");
 
   const jsonData = {
-    username: username,
-    password: password,
+    username,
+    password,
     ldapSourceId: 1,
   };
 
@@ -162,38 +161,40 @@ async function login() {
     body: JSON.stringify(jsonData),
     redirect: "follow",
   };
+
   try {
     const response = await fetch(
       "https://support.wmed.edu/LiveTime/services/v1/auth/login",
       requestOptions
     );
+
     if (!response.ok) {
       loginBTN.style.opacity = "1";
 
-      const errorMSG = document.createElement("P");
+      // Ensure only one error message
+      const existingError = document.querySelector("#err");
+      if (existingError) existingError.remove();
+
+      const errorMSG = document.createElement("p");
       errorMSG.id = "err";
       errorMSG.textContent =
         "Incorrect Username or Password. Please try again.";
       document.querySelector("#userField").focus();
 
-      if (document.querySelector("#err")) {
-        document.querySelector("#err").remove();
-        setTimeout(() => {
-          document.querySelector("#loginOverlay > div").append(errorMSG);
-        }, 200);
-      } else {
-        document.querySelector("#loginOverlay > div").append(errorMSG);
-      }
-    } else {
-      document.querySelector("#loginOverlay").remove();
+      document.querySelector("#loginOverlay > div").append(errorMSG);
+
+      return; // ✅ Stop here if login failed
     }
-    const result = await response.text();
-    const loginOBJ = JSON.parse(result);
-    console.log(loginOBJ);
+
+    // ✅ Success path
+    const loginOBJ = await response.json();
     localStorage.setItem("refreshToken", loginOBJ.refreshToken);
     localStorage.setItem("authToken", loginOBJ.token);
+
+    hidePage(); // consistent overlay removal
   } catch (error) {
-    console.log(error);
+    console.error("Login error:", error);
+    loginBTN.style.opacity = "1";
   }
 }
 
