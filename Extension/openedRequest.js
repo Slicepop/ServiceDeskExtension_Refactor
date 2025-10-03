@@ -82,6 +82,7 @@ function addSaveCloseBTN() {
   }
 }
 function changeUserTooltip() {
+  let i = 0;
   function addDirectoryLink(userTooltipInfo) {
     const infoSpan = userTooltipInfo.querySelector("span");
     if (!infoSpan) return;
@@ -90,6 +91,15 @@ function changeUserTooltip() {
     const user = userInfo.textContent.replace("Username: ", "").trim();
     console.log(userInfo.textContent, user);
     if (user === "sys") return;
+    if (user === "" && i <= 15) {
+      i++;
+      console.log(i, user);
+      setTimeout(() => {
+        addDirectoryLink(userTooltipInfo);
+      }, 500);
+      return;
+    } else if (user === "") return;
+    // if (user === "sys" || user === "") return;
     let directoryLink = document.querySelector("#directoryLink");
     if (!directoryLink) {
       directoryLink = document.createElement("a");

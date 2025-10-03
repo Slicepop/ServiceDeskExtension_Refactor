@@ -400,10 +400,9 @@ function addNoteBTN(item) {
     for (let i = 0; i < 5; i++) {
       const emptyTD = document.createElement("td");
       emptyTD.textContent = "";
-
       emptyTD.setAttribute("_ngcontent-ng-c4256737322", "");
       emptyTD.style.height = "10px";
-
+      emptyTD.style.borderTop = "none";
       row.append(emptyTD);
     }
 
