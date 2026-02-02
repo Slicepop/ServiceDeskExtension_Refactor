@@ -48,7 +48,7 @@ async function fetchTitle() {
           accept: "application/json, text/plain, */*",
           "zsd-source": "LT",
         },
-      }
+      },
     );
     const data = await response.json();
     document.title = data.subject;
@@ -115,7 +115,7 @@ function changeUserTooltip() {
   if (document.querySelector("#newI_Tag")) return;
 
   const userI_Tag = document.querySelector(
-    "#request-general-detail > div > div:nth-child(2) > div:nth-child(1) > div > div > div > div:nth-child(1) > em"
+    "#request-general-detail > div > div:nth-child(2) > div:nth-child(1) > div > div > div > div:nth-child(1) > em",
   );
   if (!userI_Tag) return;
   const newI_Tag = document.createElement("em");
@@ -162,7 +162,7 @@ function modifyDescriptionStyle() {
   const readMoreBTN = document.querySelector("#more_less_link");
 
   const descriptionField = document.querySelector(
-    "#description-tab > div.ml-2.description-box"
+    "#description-tab > div.ml-2.description-box",
   );
   const descriptionText = document.querySelector("#request-description-text");
 
@@ -180,6 +180,7 @@ function modifyDescriptionStyle() {
   // descriptionField.classList.remove("description-box");
 
   descriptionField.classList.add("resize-desc");
+  descriptionField.style.paddingTop = "10px";
   requestAnimationFrame(() => {
     const buffer = 20;
     descriptionField.style.maxHeight =
