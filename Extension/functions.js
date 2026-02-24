@@ -30,7 +30,7 @@ function debounceCalls() {
       styleRequestItem(item, index);
       addToggleablePersonalNotes(item);
       const requestReply = item.querySelector(
-        "tr:nth-child(2) > td.notetext > span"
+        "tr:nth-child(2) > td.notetext > span",
       );
       if (!requestReply) return;
       requestReply.classList.add("replyNote");
@@ -76,7 +76,7 @@ function debounceCalls() {
     //openeing a request not on the main page would make it so its not using LookupRequest making openedRequest.js not to run
     const requestNum = document.querySelector(
       // I keep this long to ensure its in the request page
-      "#editRequest > div.card.request-subject.common-subject-description-card.ml-0 > div > div.priority_requestnumber > p.request-number"
+      "#editRequest > div.card.request-subject.common-subject-description-card.ml-0 > div > div.priority_requestnumber > p.request-number",
     );
     if (!requestNum || window.location.href.includes("/LookupRequest")) return;
     window.location.href = `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${requestNum.textContent}`;
@@ -120,7 +120,7 @@ function runInitialSetup() {
     // modifies request button at the top to not have woa/wo/9.0.33.7.1.1 at the end of url
     // woa/wo/9.0.33.7.1.1 causes the session to expire eventually
     const navRequestBTN = document.querySelector(
-      "#zsd_navbar_menus > ul.navbar-nav.mr-auto > li:nth-child(2) > a"
+      "#zsd_navbar_menus > ul.navbar-nav.mr-auto > li:nth-child(2) > a",
     );
 
     if (!navRequestBTN) return;
@@ -144,13 +144,13 @@ function assignMacroReportValue() {
   // checks/sets  if user has selected to automatically go to 'Requests Status by Technician (Closed)' report
   function selectTechnicianReports() {
     const technicianReports = document.querySelector(
-      "#submenu > li:nth-child(5) > a"
+      "#submenu > li:nth-child(5) > a",
     );
     window.location.href = technicianReports.href;
   }
   function addCheckboxForMacro() {
     const areaToAddCheck = document.querySelector(
-      "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(4) > td.fieldtext"
+      "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(4) > td.fieldtext",
     );
     if (!areaToAddCheck || document.querySelector("#macroCheckbox")) return;
     const macroCheckbox = document.createElement("input");
@@ -200,21 +200,21 @@ function assignMacroReportValue() {
       const days = getDaysOfCurrentWeek();
 
       document.querySelector("#startDateUserTZ").value = formatToMMDDYY(
-        days.Monday
+        days.Monday,
       );
 
       document.querySelector("#endDateUserTZ").value = formatToMMDDYY(
-        days.Friday
+        days.Friday,
       );
       const workflowInput = document.querySelector(
-        "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(4) > td.fieldtext > select"
+        "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(4) > td.fieldtext > select",
       );
       workflowInput.selectedIndex = 5;
     }
     addReportFavicon();
     const changeEvent = new Event("change");
     const reportSelection = document.querySelector(
-      "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(1) > td.fieldtext > select"
+      "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(1) > td.fieldtext > select",
     );
     if (!reportSelection) return;
     if (reportSelection.value !== "12") {
@@ -238,10 +238,10 @@ function assignMacroReportValue() {
 
     const MacroOn = response.macroReport === true;
     const secondSubMenuItem = document.querySelector(
-      "#submenu > li:nth-child(1) > a"
+      "#submenu > li:nth-child(1) > a",
     );
     const fourthSubMenuItem = document.querySelector(
-      "#submenu > li:nth-child(5) > a"
+      "#submenu > li:nth-child(5) > a",
     );
     const KPIreportSelected =
       secondSubMenuItem &&
@@ -271,7 +271,7 @@ function addReportFavicon() {
 function clickReportBTN() {
   addReportFavicon();
   const reportsBTN = document.querySelector(
-    "#zsd_navbar_menus > ul.navbar-nav.mr-auto > li:nth-child(7) > a"
+    "#zsd_navbar_menus > ul.navbar-nav.mr-auto > li:nth-child(8) > a",
   );
   if (!reportsBTN) return;
   const reportsURL = reportsBTN.href;
@@ -283,7 +283,7 @@ function clickReportBTN() {
 function selectDefaultView() {
   setTimeout(() => {
     const incident = document.querySelector(
-      ".rowoverride > div.mb-3.col-10 > ul > li:nth-child(2)"
+      ".rowoverride > div.mb-3.col-10 > ul > li:nth-child(2)",
     );
     if (incident) {
       const incidentNum = incident.querySelector("sup");
@@ -465,7 +465,7 @@ window.addEventListener("message", (event) => {
         type: "RECEIVE_FIREBASE_KEY",
         firebaseKey: response?.firebaseKey || null,
       },
-      "*"
+      "*",
     );
   });
 });
