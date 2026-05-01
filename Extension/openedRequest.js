@@ -4,6 +4,7 @@ script.type = "module";
 script.onload = function () {
   this.remove();
 };
+var RequestID;
 (document.head || document.documentElement).appendChild(script);
 runRequestTab();
 function requestDebounceCalls() {
@@ -11,6 +12,7 @@ function requestDebounceCalls() {
   changeUserTooltip();
   modifyDescriptionStyle();
   modifySelectClass();
+  addNoteDivOpened();
 }
 function runRequestTab() {
   updateFavicon();
@@ -27,6 +29,41 @@ function runRequestTab() {
     subtree: true,
   });
 }
+async function addNoteDivOpened() {
+  addNoteDiv = document.querySelector(
+    "#requestnote_detail_container > div > div.addnoteWrapper > zsd-addnote",
+  );
+  if (!addNoteDiv) return;
+  try {
+    const response = await fetch(
+      "https://support.wmed.edu/LiveTime/services/v1/user/requests/" +
+        RequestID +
+        "/general",
+      {
+        headers: {
+          accept: "application/json, text/plain, */*",
+          "zsd-source": "LT",
+        },
+      },
+    );
+    const data = await response.json();
+    const currStatus = data.status.statusName;
+    if (currStatus == "Open") {
+      var changeRequestCheck = document.querySelector(
+        "#changeRequestStatusCheckBox",
+      );
+      if (changeRequestCheck.classList.contains("clicked")) return;
+      changeRequestCheck.classList.add("clicked");
+      changeRequestCheck.click();
+      document.querySelector("div.change-status-wrapper > select").click();
+      var changeRequestSelect = document.querySelector(
+        "div.change-status-wrapper > select",
+      );
+      changeRequestSelect.value = 127;
+      changeRequestSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  } catch (error) {}
+}
 function updateFavicon() {
   if (document.querySelector("#requestIcon")) return;
   const originalFavicon = document.querySelector("head > link:nth-child(13)");
@@ -38,6 +75,7 @@ function updateFavicon() {
 }
 async function fetchTitle() {
   const itemID = window.location.href.split("requestId=")[1];
+  RequestID = itemID;
   try {
     const response = await fetch(
       "https://support.wmed.edu/LiveTime/services/v1/user/requests/" +
