@@ -209,7 +209,16 @@ function assignMacroReportValue() {
       const workflowInput = document.querySelector(
         "#technicianReportsForm > div > div.windowContent > div > table > tbody > tr:nth-child(4) > td.fieldtext > select",
       );
-      workflowInput.value = 6;
+      if (workflowInput) {
+        const itSupportOption = Array.from(workflowInput.options).find(
+          (option) => option.textContent.trim().toLowerCase() === "it support",
+        );
+        if (itSupportOption) {
+          workflowInput.value = itSupportOption.value;
+        } else {
+          workflowInput.selectedIndex = 0;
+        }
+      }
     }
     addReportFavicon();
     const changeEvent = new Event("change");
