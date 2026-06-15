@@ -15,7 +15,7 @@ async function refreshToken() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("refreshToken")}`,
         },
-      }
+      },
     );
     if (respond.ok) {
       const data = await respond.json();
@@ -42,7 +42,7 @@ async function checkAuth() {
   try {
     const response = await fetch(
       "https://support.wmed.edu/LiveTime/services/v1/user/client/findusers?internalOnly=true&clientTypes=8&searchTerm=Soffset=0&limit=10&locale=en-US",
-      requestOptions
+      requestOptions,
     );
     if (response.ok) {
       return true;
@@ -165,7 +165,7 @@ async function login() {
   try {
     const response = await fetch(
       "https://support.wmed.edu/LiveTime/services/v1/auth/login",
-      requestOptions
+      requestOptions,
     );
 
     if (!response.ok) {
@@ -251,7 +251,7 @@ async function searchUser(event) {
       "https://support.wmed.edu/LiveTime/services/v1/user/client/findusers?internalOnly=true&clientTypes=8&searchTerm=" +
         encodeURIComponent(searchTerm.trim()) +
         "&offset=0&limit=10&locale=en-US",
-      requestOptions
+      requestOptions,
     );
 
     if (!response.ok) {
@@ -518,7 +518,7 @@ async function createQuickCall(subject, clientId, itemId) {
       "https://support.wmed.edu/LiveTime/services/v1/user/quickcall/request/quickCall/" +
         index +
         "?locale=en-US",
-      requestOptions
+      requestOptions,
     );
     if (!response.ok) {
       // If unauthorized, try to refresh token and retry.
@@ -535,7 +535,7 @@ async function createQuickCall(subject, clientId, itemId) {
       } else {
         // Handle other HTTP errors
         console.error(
-          `Error creating quick call: ${response.status} ${response.statusText}`
+          `Error creating quick call: ${response.status} ${response.statusText}`,
         );
         const errorText = await response.text();
         console.error("Response body:", errorText);
@@ -615,10 +615,17 @@ toggleDark.addEventListener("click", function () {
   quickCallButtons.forEach((button) => {
     button.classList.toggle("dark-mode");
   });
+  if (ticketMonitor) {
+    ticketMonitor.classList.toggle("dark-mode");
+    ticketMonitor.querySelectorAll("*").forEach((child) => {
+      child.classList.toggle("dark-mode");
+    });
+  }
   const isDarkMode = document.body.classList.contains("dark-mode");
   localStorage.setItem("isDarkMode", isDarkMode);
 });
 const quickCallButtons = document.querySelectorAll("#myButton2");
+const ticketMonitor = document.querySelector("#ticketMonitor");
 // On page load, check the saved preference and apply dark mode if needed
 document.addEventListener("DOMContentLoaded", function () {
   const savedTheme = localStorage.getItem("isDarkMode");
@@ -628,7 +635,72 @@ document.addEventListener("DOMContentLoaded", function () {
     quickCallButtons.forEach((button) => {
       button.classList.add("dark-mode");
     });
+    if (ticketMonitor) {
+      ticketMonitor.classList.add("dark-mode");
+      ticketMonitor.querySelectorAll("*").forEach((child) => {
+        child.classList.add("dark-mode");
+      });
+    }
   } else {
     toggleDark.src = chrome.runtime.getURL("./images/sun-solid.svg");
   }
+});
+// TicketMonitor
+
+const ticketMonitorCheck = document.querySelector("#enableTicketMonitor");
+const ticketMonitorIntervalSelect = document.querySelector("#intervals");
+// If there is a stored interval value, get it and update dropdown value
+let interval = chrome.storage.local.get(["intervalValue"], (result) => {
+  if (result) {
+    ticketMonitorIntervalSelect.value = result.intervalValue;
+  }
+});
+
+ticketMonitorCheck.addEventListener("change", async (e) => {
+  // Get active tab
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  // Monitor active
+  if (e.target.checked && tab.title === "Service Manager") {
+    const prefs = {
+      monitoring: "true",
+      tabId: tab.id,
+      intervalTime: ticketMonitorIntervalSelect.value,
+    };
+    chrome.tabs.sendMessage(tab.id, { event: "initializeAudio" });
+    chrome.runtime.sendMessage({ event: "onStart", prefs });
+    // Monitor inactive
+  } else {
+    const prefs = {
+      monitoring: "false",
+      tabId: tab.id,
+    };
+    chrome.runtime.sendMessage({ event: "onStop", prefs });
+  }
+});
+// Check monitoring state when popup is opened and update toggle accordingly
+chrome.storage.local.get(["monitoring"], (result) => {
+  const { monitoring } = result;
+
+  if (typeof monitoring === "undefined") {
+    monitoring = "false";
+    chrome.storage.local.set({ monitoring: "false" });
+  }
+
+  ticketMonitorCheck.checked = monitoring === "true";
+});
+
+// Watch dropdown value changes and stop monitoring if interval is changed
+ticketMonitorIntervalSelect.addEventListener("change", async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  chrome.storage.local.set({
+    intervalValue: ticketMonitorIntervalSelect.value,
+  });
+  const prefs = {
+    monitoring: "false",
+    tabId: tab.id,
+  };
+
+  chrome.runtime.sendMessage({ event: "onStop", prefs });
+  ticketMonitorCheck.checked = false;
 });

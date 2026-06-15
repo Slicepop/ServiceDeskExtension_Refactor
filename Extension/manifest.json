@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Hephaestus",
-  "version": "1.2.12",
+  "version": "1.3.0",
   "icons": {
     "16": "images/icon16.png",
     "48": "images/icon48.png",
@@ -26,7 +26,8 @@
         "styles.css",
         "images/report.png",
         "images/request.ico",
-        "userStyle.css"
+        "userStyle.css",
+        "fearstofathom.mp3"
       ],
       "matches": ["https://support.wmed.edu/*"]
     }
@@ -37,7 +38,12 @@
       "exclude_matches": [
         "https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?*"
       ],
-      "js": ["functions.js", "main.js"],
+      "js": [
+        "sweetalert2.all.min.js",
+        "ticketMonitor.js",
+        "functions.js",
+        "main.js"
+      ],
       "css": ["styles.css"],
       "type": "module",
       "run_at": "document_idle"

@@ -13,9 +13,26 @@
       <input id="subjectLine" placeholder="General Description" type="text" />
     </div>
     <div id="buttons">
-      <button id="myButton2" title="Create Phone Call Ticket">Phone Call</button>
-      <button id="myButton2" title="Create Walk Up Ticket">Walk-Up</button>
-      <button id="myButton2" title="Create Teams Ticket">Teams Message</button>
+      <div>
+
+        <button id="myButton2" title="Create Phone Call Ticket">Phone Call</button>
+        <button id="myButton2" title="Create Walk Up Ticket">Walk-Up</button>
+        <button id="myButton2" title="Create Teams Ticket">Teams Message</button>
+        <div id="ticketMonitor">
+
+          <input type="checkbox" id="enableTicketMonitor">
+          <label for="enableTicketMonitor">Monitor Ticket Queue: </label>
+          <select name="Intervals" id="intervals">
+            <option value="0">Select interval</option>
+            <option value="0.083">5 Seconds</option>
+            <option value="0.166">10 Seconds</option>
+            <option value="0.25">15 Seconds</option>
+            <option value="0.5">30 Seconds</option>
+            <option value="1">1 Minute</option>
+            <option value="10">10 Minutes</option>
+          </select>
+      </div>
+    </div>
     </div>
 
     <style>

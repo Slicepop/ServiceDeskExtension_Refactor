@@ -35,8 +35,7 @@ button.dark-mode {
 }
 
 .dark-mode input {
-  background-color: #3d3d3d;
-  color: white;
+  color-scheme: dark;
 }
 
 .dark-mode ::placeholder {
@@ -62,10 +61,17 @@ input {
 #buttons {
   margin-left: auto;
   margin-right: auto;
-  padding-bottom: 50px;
+  padding-bottom: 30px;
   max-width: fit-content;
 }
-
+.dark-mode select {
+  color-scheme: dark;
+}
+#ticketMonitor {
+  align-items: center;
+  margin-top: 5px;
+  margin-left: 12px;
+}
 #subjectLine {
   margin-top: 10px;
   margin-bottom: 10px;
