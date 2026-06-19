@@ -130,6 +130,7 @@ function runInitialSetup() {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "refreshPage") {
       setTimeout(() => {
+        console.log("refreshing Page");
         refreshPage();
       }, 800);
     }

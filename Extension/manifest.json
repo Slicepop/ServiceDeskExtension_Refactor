@@ -53,7 +53,7 @@
         "https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?*"
       ],
       "js": ["openedRequest.js"],
-      "css": ["styles.css"],
+      "css": ["styles.css", "injectedstyles.css"],
       "type": "module",
       "run_at": "document_idle"
     }

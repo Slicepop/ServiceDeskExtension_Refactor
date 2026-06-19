@@ -96,7 +96,7 @@ async function fetchTitle() {
 function updateRequest() {
   try {
     console.log("testUpdateRequest");
-    chrome.runtime.sendMessage({ message: "updateRequest" });
+    chrome.runtime.sendMessage({ event: "updateRequest" });
   } catch {}
   setTimeout(requestDebounceCalls, 150);
 }

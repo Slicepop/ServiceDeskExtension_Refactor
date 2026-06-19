@@ -670,6 +670,9 @@ ticketMonitorCheck.addEventListener("change", async (e) => {
     chrome.runtime.sendMessage({ event: "onStart", prefs });
     // Monitor inactive
   } else {
+    if (tab.title != "Service Manager") {
+      window.alert("must toggle ticket monitoring on service manager page");
+    }
     const prefs = {
       monitoring: "false",
       tabId: tab.id,

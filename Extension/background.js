@@ -1,16 +1,18 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const { event, prefs } = request;
-
+  console.log(request);
   switch (event) {
     case "updateRequest":
+      console.log("request updates");
       chrome.tabs.query({}, (tabs) => {
         for (let tab of tabs) {
           // Send message to all tabs where your extension is injected
           chrome.tabs.sendMessage(tab.id, { action: "refreshPage" }, () => {
             // Ignore errors like "receiving end does not exist"
             if (chrome.runtime.lastError) {
-              // This just means your content script isn't in that tab — fine to ignore
+              return;
             }
+            console.log("Page refresh");
           });
         }
       });
