@@ -25,7 +25,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       chrome.storage.local.set({
         monitoring: "true",
         tabId: prefs.tabId,
-        intervalTime: prefs.intervalTime,
       });
       chrome.tabs.sendMessage(prefs.tabId, { action: "startMonitoring" });
       break;
