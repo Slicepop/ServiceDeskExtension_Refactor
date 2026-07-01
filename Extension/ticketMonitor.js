@@ -286,7 +286,7 @@ function sendNotif(message) {
 }
 
 let websocket = null;
-const wsURI = "wss://hephaestusdev.slicepop.dev";
+const wsURI = "wss://hephaestus.slicepop.dev";
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "startMonitoring") {
     document.title = "👁 Service Manager";
