@@ -249,13 +249,68 @@ let intervalSelection;
 //     console.log("Monitoring stopped. State reset.");
 //   }
 // }
+
+function sendNotif(message) {
+  document.title = "📣 Service Manager";
+  Swal.fire({
+    color: "#fff",
+    title: `A ticket just landed!`,
+    icon: "warning",
+    iconColor: "#4ddfd4",
+    background: "#282a2b",
+    text: `Subject - ${message.title}`,
+    confirmButtonText: "Take me there!",
+    confirmButtonColor: "#07ada1",
+    showCancelButton: true,
+    cancelButtonText: "Close",
+    reverseButtons: true,
+    theme: "auto",
+    padding: "0 0 2.5rem",
+  }).then((result) => {
+    document.title = "👁 Service Manager";
+
+    if (result.isConfirmed) {
+      window.open(
+        `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${message.id}`,
+      );
+    }
+    const refreshIcon = document.querySelector(
+      "#requestfiltercard > div.card-body.pt-0 > zsd-requestfilter > div.main-filter-wrapper > div.tabheader > span.reseticon",
+    );
+    if (refreshIcon) refreshIcon.click();
+  });
+
+  if (alertAudio) {
+    alertAudio.play().catch((err) => console.warn("Audio play blocked:", err));
+  }
+}
+
 let websocket = null;
+const wsURI = "wss://hephaestusdev.slicepop.dev";
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "startMonitoring") {
     document.title = "👁 Service Manager";
+    let reconnectAttempts = 0;
+    function retryConnection(delay) {
+      reconnectAttempts++;
+      console.log(`Reconnecting in ${delay}ms...`);
+      setTimeout(establishConnection, delay);
+    }
+    function establishConnection() {
+      websocket = new WebSocket(wsURI);
+      console.log("establishing websocket Connection");
+      websocket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        sendNotif(message);
+      };
+      websocket.onclose = () => {
+        console.log("Connection closed:", event);
 
-    const wsURI = "wss://hephaestus.slicepop.dev";
-    websocket = new WebSocket(wsURI);
+        let delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+        retryConnection(delay);
+      };
+    }
+    establishConnection();
     alertAudio = new Audio(chrome.runtime.getURL("fearstofathom.mp3"));
     alertAudio.volume = 0;
     alertAudio
@@ -266,44 +321,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         alertAudio.volume = 1;
       })
       .catch((e) => console.warn("Audio pre warm failed:", e));
-    websocket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      console.log(message);
-      document.title = "📣 Service Manager";
-      Swal.fire({
-        color: "#fff",
-        title: `A ticket just landed!`,
-        icon: "warning",
-        iconColor: "#4ddfd4",
-        background: "#282a2b",
-        text: `Subject - ${message.title}`,
-        confirmButtonText: "Take me there!",
-        confirmButtonColor: "#07ada1",
-        showCancelButton: true,
-        cancelButtonText: "Close",
-        reverseButtons: true,
-        theme: "auto",
-        padding: "0 0 2.5rem",
-      }).then((result) => {
-        document.title = "👁 Service Manager";
-
-        if (result.isConfirmed) {
-          window.open(
-            `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${message.id}`,
-          );
-        }
-        const refreshIcon = document.querySelector(
-          "#requestfiltercard > div.card-body.pt-0 > zsd-requestfilter > div.main-filter-wrapper > div.tabheader > span.reseticon",
-        );
-        if (refreshIcon) refreshIcon.click();
-      });
-
-      if (alertAudio) {
-        alertAudio
-          .play()
-          .catch((err) => console.warn("Audio play blocked:", err));
-      }
-    };
   } else if (request.action === "stopMonitoring") {
     if (websocket) websocket.close();
     document.title = "Service Manager";
