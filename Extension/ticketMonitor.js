@@ -284,15 +284,17 @@ function sendNotif(message) {
     alertAudio.play().catch((err) => console.warn("Audio play blocked:", err));
   }
 }
-
+let monitoringState = false;
 let websocket = null;
 const wsURI = "wss://hephaestus.slicepop.dev";
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "startMonitoring") {
     document.title = "👁 Service Manager";
+    monitoringState = true;
     let reconnectAttempts = 0;
     function retryConnection(delay) {
       reconnectAttempts++;
+      if (!monitoringState) return;
       console.log(`Reconnecting in ${delay}ms...`);
       setTimeout(establishConnection, delay);
     }
@@ -323,6 +325,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       .catch((e) => console.warn("Audio pre warm failed:", e));
   } else if (request.action === "stopMonitoring") {
     if (websocket) websocket.close();
+    monitoringState = false;
     document.title = "Service Manager";
   }
 });
