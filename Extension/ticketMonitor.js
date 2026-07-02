@@ -18,6 +18,29 @@ let monitoringState = false;
     console.error("Failed to get monitoring state:", error);
   }
 })();
+fetch("https://support.wmed.edu/LiveTime/images/incident.jpg", {
+  headers: {
+    "sec-ch-ua": '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Windows"',
+  },
+  referrer: "https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa",
+  body: null,
+  method: "GET",
+  mode: "cors",
+});
+async function getAuthToken() {
+  const response = await fetch(
+    `https://support.wmed.edu/LiveTime/services/v1/user/requests/121103/basic`,
+    {
+      headers: {
+        "zsd-source": "LT",
+      },
+    },
+  );
+  const data = await response.json();
+  return data.subject;
+}
 function sendNotif(message) {
   document.title = "📣 Service Manager";
   Swal.fire({
@@ -62,11 +85,19 @@ function startMonitoring() {
     console.log(`Reconnecting in ${delay}ms...`);
     setTimeout(establishConnection, delay);
   }
-  function establishConnection() {
+  async function establishConnection() {
+    const token = await getAuthToken();
     websocket = new WebSocket(wsURI);
+    websocket.onopen = () => {
+      websocket.send(JSON.stringify({ type: "AUTH", token }));
+    };
     console.log("establishing websocket Connection");
     websocket.onmessage = (event) => {
       const message = JSON.parse(event.data);
+      if (message?.type == "status") {
+        console.log(message.status);
+        return;
+      }
       sendNotif(message);
     };
     websocket.onclose = () => {
