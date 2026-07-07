@@ -132,7 +132,9 @@ function startMonitoring() {
     .catch((e) => console.warn("Audio pre warm failed:", e));
 }
 let websocket = null;
-const wsURI = "wss://dev.slicepop.dev";
+// const wsURI = "wss://dev.slicepop.dev";
+const wsURI = "wss://hephaestus.slicepop.dev";
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "startMonitoring") {
     startMonitoring();
