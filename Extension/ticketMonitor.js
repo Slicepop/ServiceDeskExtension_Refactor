@@ -8,10 +8,28 @@ let intervalSelection;
 let monitoring = false;
 let monitoringState = false;
 let authToken = null;
+function unlockAudio() {
+  if (!alertAudio) return;
+
+  alertAudio
+    .play()
+    .then(() => {
+      alertAudio.pause();
+      alertAudio.currentTime = 0;
+      console.log("Audio unlocked");
+      document.removeEventListener("click", unlockAudio);
+    })
+    .catch((err) => {
+      console.warn(err);
+    });
+}
+
+document.addEventListener("click", unlockAudio);
+
 (async () => {
   try {
     const response = await chrome.runtime.sendMessage({ event: "pageLoad" });
-    console.log(response, "ASDSADSD");
+    console.log(response);
     monitoring = response.monitoring;
     monitoringState = monitoring == "true";
     if (monitoringState) startMonitoring();
@@ -45,6 +63,9 @@ async function getAuthToken() {
 }
 function sendNotif(message, index) {
   const lastIndex = message.length - 1;
+  if (alertAudio) {
+    alertAudio.play().catch((err) => console.warn("Audio play blocked:", err));
+  }
   console.log(index, "index");
   document.title = "📣 Service Manager";
   Swal.fire({
@@ -77,10 +98,6 @@ function sendNotif(message, index) {
       sendNotif(message, ++index);
     }
   });
-
-  if (alertAudio) {
-    alertAudio.play().catch((err) => console.warn("Audio play blocked:", err));
-  }
 }
 function startMonitoring() {
   document.title = "👁 Service Manager";
@@ -121,15 +138,6 @@ function startMonitoring() {
   }
   establishConnection();
   alertAudio = new Audio(chrome.runtime.getURL("fearstofathom.mp3"));
-  alertAudio.volume = 0;
-  alertAudio
-    .play()
-    .then(() => {
-      alertAudio.pause();
-      alertAudio.currentTime = 0;
-      alertAudio.volume = 1;
-    })
-    .catch((e) => console.warn("Audio pre warm failed:", e));
 }
 let websocket = null;
 // const wsURI = "wss://dev.slicepop.dev";
@@ -147,19 +155,3 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // window.startMonitoring = startMonitoring;
 // window.stopMonitoring = stopMonitoring;
-function unlockAudio() {
-  if (!alertAudio) return;
-
-  alertAudio
-    .play()
-    .then(() => {
-      alertAudio.pause();
-      alertAudio.currentTime = 0;
-      console.log("Audio unlocked");
-    })
-    .catch(console.warn);
-
-  document.removeEventListener("click", unlockAudio);
-}
-
-document.addEventListener("click", unlockAudio);
