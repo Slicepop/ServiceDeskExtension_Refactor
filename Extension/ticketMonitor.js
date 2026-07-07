@@ -7,6 +7,7 @@ let intervalSelection;
 
 let monitoring = false;
 let monitoringState = false;
+let authToken = null;
 (async () => {
   try {
     const response = await chrome.runtime.sendMessage({ event: "pageLoad" });
@@ -30,7 +31,7 @@ fetch("https://support.wmed.edu/LiveTime/images/incident.jpg", {
   mode: "cors",
 });
 async function getAuthToken() {
-  const response = await fetch(
+  response = await fetch(
     `https://support.wmed.edu/LiveTime/services/v1/user/requests/121103/basic`,
     {
       headers: {
@@ -39,9 +40,12 @@ async function getAuthToken() {
     },
   );
   const data = await response.json();
-  return data.subject;
+  authToken = data.subject;
+  return authToken;
 }
-function sendNotif(message) {
+function sendNotif(message, index) {
+  const lastIndex = message.length - 1;
+  console.log(index, "index");
   document.title = "📣 Service Manager";
   Swal.fire({
     color: "#fff",
@@ -49,7 +53,7 @@ function sendNotif(message) {
     icon: "warning",
     iconColor: "#4ddfd4",
     background: "#282a2b",
-    text: `Subject - ${message.title}`,
+    text: `Subject - ${message[index].title}`,
     confirmButtonText: "Take me there!",
     confirmButtonColor: "#07ada1",
     showCancelButton: true,
@@ -62,13 +66,16 @@ function sendNotif(message) {
 
     if (result.isConfirmed) {
       window.open(
-        `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${message.id}`,
+        `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${message[index].id}`,
       );
     }
     const refreshIcon = document.querySelector(
       "#requestfiltercard > div.card-body.pt-0 > zsd-requestfilter > div.main-filter-wrapper > div.tabheader > span.reseticon",
     );
     if (refreshIcon) refreshIcon.click();
+    if (index < lastIndex) {
+      sendNotif(message, ++index);
+    }
   });
 
   if (alertAudio) {
@@ -86,7 +93,7 @@ function startMonitoring() {
     setTimeout(establishConnection, delay);
   }
   async function establishConnection() {
-    const token = await getAuthToken();
+    const token = authToken || (await getAuthToken());
     websocket = new WebSocket(wsURI);
     websocket.onopen = () => {
       websocket.send(JSON.stringify({ type: "AUTH", token }));
@@ -97,8 +104,13 @@ function startMonitoring() {
       if (message?.type == "status") {
         console.log(message.status);
         return;
+      } else if (message?.type == "notification") {
+        for (const notif of message.notification) {
+          console.log(notif);
+        }
+        sendNotif(message.notification, 0);
+        return;
       }
-      sendNotif(message);
     };
     websocket.onclose = () => {
       console.log("Connection closed:", event);
@@ -120,7 +132,7 @@ function startMonitoring() {
     .catch((e) => console.warn("Audio pre warm failed:", e));
 }
 let websocket = null;
-const wsURI = "wss://hephaestus.slicepop.dev";
+const wsURI = "wss://dev.slicepop.dev";
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "startMonitoring") {
     startMonitoring();
