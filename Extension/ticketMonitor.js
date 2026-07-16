@@ -8,6 +8,9 @@ let intervalSelection;
 let monitoring = false;
 let monitoringState = false;
 let authToken = null;
+
+// const wsURI = "wss://dev.slicepop.dev";
+const wsURI = "wss://hephaestus.slicepop.dev";
 function unlockAudio() {
   if (!alertAudio) return;
 
@@ -86,8 +89,14 @@ function sendNotif(message, index) {
     document.title = "👁 Service Manager";
 
     if (result.isConfirmed) {
+      const id = Number(message[index].id);
+
+      if (!Number.isInteger(id)) {
+        return;
+      }
+
       window.open(
-        `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${message[index].id}`,
+        `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${id}`,
       );
     }
     const refreshIcon = document.querySelector(
@@ -111,6 +120,7 @@ function startMonitoring() {
   }
   async function establishConnection() {
     const token = authToken || (await getAuthToken());
+    if (!token) return;
     websocket = new WebSocket(wsURI);
     websocket.onopen = () => {
       websocket.send(JSON.stringify({ type: "AUTH", token }));
@@ -140,18 +150,24 @@ function startMonitoring() {
   alertAudio = new Audio(chrome.runtime.getURL("fearstofathom.mp3"));
 }
 let websocket = null;
-// const wsURI = "wss://dev.slicepop.dev";
-const wsURI = "wss://hephaestus.slicepop.dev";
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "startMonitoring") {
     startMonitoring();
   } else if (request.action === "stopMonitoring") {
-    if (websocket) websocket.close();
+    if (websocket) websocket.close(1000, "User turned monitoring off");
     monitoringState = false;
     document.title = "Service Manager";
   }
 });
 
-// window.startMonitoring = startMonitoring;
-// window.stopMonitoring = stopMonitoring;
+window.addEventListener("beforeunload", () => {
+  if (!websocket) return;
+  try {
+    websocket.onclose = function () {};
+    // close with code and reason where supported
+    websocket.close(1000, "Browser shutting down");
+  } catch (e) {
+    console.warn("Error closing websocket on unload:", e);
+  }
+});
