@@ -5,276 +5,169 @@ let lastKnownActionDate = null;
 let alertAudio;
 let intervalSelection;
 
-chrome.runtime.sendMessage({ event: "pageRefreshed" });
+let monitoring = false;
+let monitoringState = false;
+let authToken = null;
 
-if (
-  window.location.href.includes(
-    "https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/",
-  )
-) {
-  document.querySelectorAll("zsd-requestalert").forEach((e) => {
-    e.style.borderRadius = "16px";
-  });
+// const wsURI = "wss://dev.slicepop.dev";
+const wsURI = "wss://hephaestus.slicepop.dev";
+function unlockAudio() {
+  if (!alertAudio) return;
 
-  const style = document.createElement("style");
-  style.textContent = `
-    #editRequest > div.card.request-subject.common-subject-description-card.ml-0 > div {
-        background-color: #c2d9ff !important;
-    }
-  `;
-  document.head.appendChild(style);
+  alertAudio
+    .play()
+    .then(() => {
+      alertAudio.pause();
+      alertAudio.currentTime = 0;
+      console.log("Audio unlocked");
+      document.removeEventListener("click", unlockAudio);
+    })
+    .catch((err) => {
+      console.warn(err);
+    });
 }
 
-element = document.querySelector(
-  "#rightpanel > zsd-user-requestlist > div.row.rowoverride > div.mb-3.col-10 > ul > li:nth-child(2) > span",
-);
+document.addEventListener("click", unlockAudio);
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.event === "initializeAudio") {
-    if (!alertAudio) {
-      alertAudio = new Audio(chrome.runtime.getURL("fearstofathom.mp3"));
-      alertAudio.volume = 0;
-      alertAudio
-        .play()
-        .then(() => {
-          alertAudio.pause();
-          alertAudio.currentTime = 0;
-          alertAudio.volume = 1;
-        })
-        .catch((e) => console.warn("Audio pre warm failed:", e));
-    }
+(async () => {
+  try {
+    const response = await chrome.runtime.sendMessage({ event: "pageLoad" });
+    console.log(response);
+    monitoring = response.monitoring;
+    monitoringState = monitoring == "true";
+    if (monitoringState) startMonitoring();
+  } catch (error) {
+    console.error("Failed to get monitoring state:", error);
   }
+})();
+fetch("https://support.wmed.edu/LiveTime/images/incident.jpg", {
+  headers: {
+    "sec-ch-ua": '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Windows"',
+  },
+  referrer: "https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa",
+  body: null,
+  method: "GET",
+  mode: "cors",
 });
-
-async function fetchIncidentData() {
-  const response = await fetch(
-    "https://support.wmed.edu/LiveTime/services/v1/user/requests/search?currentPage=incident&offset=0&limit=40&sortBy=requestNumber&sortOrder=DESC&filterId=176&locale=en-GB",
+async function getAuthToken() {
+  response = await fetch(
+    `https://support.wmed.edu/LiveTime/services/v1/user/requests/121103/basic`,
     {
       headers: {
-        accept: "application/json, text/plain, */*",
-        "accept-language": "en-GB,en;q=0.7",
-        "content-type": "application/json",
-        "sec-ch-ua": '"Brave";v="135", "Not-A.Brand";v="8", "Chromium";v="135"',
-        "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": '"Windows"',
-        "sec-fetch-dest": "empty",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-origin",
-        "sec-gpc": "1",
         "zsd-source": "LT",
       },
-      referrer: "https://support.wmed.edu/LiveTime/WebObjects/LiveTime",
-      referrerPolicy: "strict-origin-when-cross-origin",
-      body: '{"requestAdditionalSearchInfo":{},"searchTerm":null,"requestFilterInfo":null}',
-      method: "POST",
-      mode: "cors",
-      credentials: "include",
     },
   );
-
-  if (!response.ok) {
-    throw new Error(`Network response was not ok: ${response.statusText}`);
-  }
-
   const data = await response.json();
-  if (
-    !data ||
-    typeof data.resultCount === "undefined" ||
-    !Array.isArray(data.results)
-  ) {
-    throw new Error("Invalid API response structure.");
-  }
-  return data;
+  authToken = data.subject;
+  return authToken;
 }
+function sendNotif(message, index) {
+  const lastIndex = message.length - 1;
+  if (alertAudio) {
+    alertAudio.play().catch((err) => console.warn("Audio play blocked:", err));
+  }
+  console.log(index, "index");
+  document.title = "📣 Service Manager";
+  Swal.fire({
+    color: "#fff",
+    title: `A ticket just landed!`,
+    icon: "warning",
+    iconColor: "#4ddfd4",
+    background: "#282a2b",
+    text: `Subject - ${message[index].title}`,
+    confirmButtonText: "Take me there!",
+    confirmButtonColor: "#07ada1",
+    showCancelButton: true,
+    cancelButtonText: "Close",
+    reverseButtons: true,
+    theme: "auto",
+    padding: "0 0 2.5rem",
+  }).then((result) => {
+    document.title = "👁 Service Manager";
 
-async function initializeMonitoringData() {
-  try {
-    const data = await fetchIncidentData();
-    incidentCount = data.resultCount;
-    console.log(`Initial incident count: ${incidentCount}`);
+    if (result.isConfirmed) {
+      const id = Number(message[index].id);
 
-    if (data.results && data.results.length > 0) {
-      const latestIncident = data.results[0];
-      const lastActionDateValue = latestIncident.values.find(
-        (v) => v.columnName === "lastActionDate",
+      if (!Number.isInteger(id)) {
+        return;
+      }
+
+      window.open(
+        `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${id}`,
       );
-      if (lastActionDateValue && lastActionDateValue.value) {
-        lastKnownActionDate = new Date(lastActionDateValue.value);
-        console.log(
-          `Initial last action date: ${lastKnownActionDate.toLocaleString()}`,
-        );
-      }
     }
-  } catch (error) {
-    console.error("Error during initial fetch for incident data:", error);
-    // Don't start interval if initial fetch fails significantly
-    throw error;
-  }
-}
-
-async function startMonitoring() {
-  if (interval) {
-    console.log("Monitoring already started.");
-    return;
-  }
-
-  document.title = "👁 Service Manager";
-
-  try {
-    await initializeMonitoringData(); // Ensure initial data is set before starting interval
-  } catch (error) {
-    console.error(
-      "Failed to initialize monitoring data. Not starting interval.",
+    const refreshIcon = document.querySelector(
+      "#requestfiltercard > div.card-body.pt-0 > zsd-requestfilter > div.main-filter-wrapper > div.tabheader > span.reseticon",
     );
-    return;
-  }
-
-  interval = setInterval(async () => {
-    try {
-      const data = await fetchIncidentData();
-      const newIncidentCount = data.resultCount;
-      console.log(`Current fetched incident count: ${newIncidentCount}`);
-
-      let isNewActivity = false;
-      let changeType = "";
-      let subject = "Subject not found";
-      let requestNum = "N/A";
-
-      if (newIncidentCount > incidentCount) {
-        // --- Case 1: A brand new ticket has arrived ---
-        isNewActivity = true;
-        changeType = "new ticket";
-        console.log("Detected: New ticket");
-
-        if (data.results && data.results.length > 0) {
-          const latestIncident = data.results[0]; // The very first item should be the newest by sort order
-          const subjectValue = latestIncident.values.find(
-            (v) => v.columnName === "subject",
-          );
-          if (subjectValue) subject = subjectValue.value;
-
-          const requestNumValue = latestIncident.values.find(
-            (v) => v.columnName === "requestNumber",
-          );
-          if (requestNumValue) requestNum = requestNumValue.value;
-
-          const lastActionDateValue = latestIncident.values.find(
-            (v) => v.columnName === "lastActionDate",
-          );
-          if (lastActionDateValue && lastActionDateValue.value) {
-            lastKnownActionDate = new Date(lastActionDateValue.value); // Update lastKnownActionDate with the newest ticket's date
-          }
-        }
-      } else if (data.results && data.results.length > 0) {
-        // --- Case 2: No new ticket count, check for updates to existing tickets ---
-        const currentLatestIncident = data.results[0];
-        const currentLastActionDateValue = currentLatestIncident.values.find(
-          (v) => v.columnName === "lastActionDate",
-        );
-
-        if (currentLastActionDateValue && currentLastActionDateValue.value) {
-          const currentLastActionDate = new Date(
-            currentLastActionDateValue.value,
-          );
-
-          // Check if currentLastActionDate is strictly greater than the last known
-          if (
-            lastKnownActionDate &&
-            currentLastActionDate.getTime() > lastKnownActionDate.getTime()
-          ) {
-            isNewActivity = true;
-            changeType = "update to an existing ticket";
-            console.log("Detected: Update to existing ticket");
-
-            const subjectValue = currentLatestIncident.values.find(
-              (v) => v.columnName === "subject",
-            );
-            if (subjectValue) subject = subjectValue.value;
-
-            const requestNumValue = currentLatestIncident.values.find(
-              (v) => v.columnName === "requestNumber",
-            );
-            if (requestNumValue) requestNum = requestNumValue.value;
-
-            lastKnownActionDate = currentLastActionDate; // Update lastKnownActionDate
-          }
-        }
-      }
-
-      // Update incidentCount regardless of activity detection for the next cycle
-      incidentCount = newIncidentCount;
-
-      if (isNewActivity) {
-        document.title = "📣 Service Manager";
-        Swal.fire({
-          color: "#fff",
-          title: `A ${changeType} just landed!`,
-          icon: "warning",
-          iconColor: "#4ddfd4",
-          background: "#282a2b",
-          text: `Subject - ${subject}`,
-          confirmButtonText: "Take me there!",
-          confirmButtonColor: "#07ada1",
-          showCancelButton: true,
-          cancelButtonText: "Close",
-          reverseButtons: true,
-          theme: "auto",
-          padding: "0 0 2.5rem",
-        }).then((result) => {
-          document.title = "👁 Service Manager";
-
-          if (result.isConfirmed) {
-            window.open(
-              `https://support.wmed.edu/LiveTime/WebObjects/LiveTime.woa/wa/LookupRequest?sourceId=New&requestId=${requestNum}`,
-            );
-          }
-          const refreshIcon = document.querySelector(
-            "#requestfiltercard > div.card-body.pt-0 > zsd-requestfilter > div.main-filter-wrapper > div.tabheader > span.reseticon",
-          );
-          if (refreshIcon) refreshIcon.click();
-        });
-
-        if (alertAudio) {
-          alertAudio
-            .play()
-            .catch((err) => console.warn("Audio play blocked:", err));
-        }
-      } else {
-        console.log("No new activity detected.");
-      }
-    } catch (error) {
-      console.error("Error during interval fetch:", error);
+    if (refreshIcon) refreshIcon.click();
+    if (index < lastIndex) {
+      sendNotif(message, ++index);
     }
-  }, intervalSelection);
+  });
 }
-
-function stopMonitoring() {
-  if (interval) {
-    clearInterval(interval);
-    interval = null;
-    document.title = "Service Manager";
-    lastKnownActionDate = null;
-    incidentCount = -1; // Reset incident count as well
-    console.log("Monitoring stopped. State reset.");
+function startMonitoring() {
+  document.title = "👁 Service Manager";
+  monitoringState = true;
+  let reconnectAttempts = 0;
+  function retryConnection(delay) {
+    reconnectAttempts++;
+    if (!monitoringState) return;
+    console.log(`Reconnecting in ${delay}ms...`);
+    setTimeout(establishConnection, delay);
   }
+  async function establishConnection() {
+    const token = authToken || (await getAuthToken());
+    if (!token) return;
+    websocket = new WebSocket(wsURI);
+    websocket.onopen = () => {
+      websocket.send(JSON.stringify({ type: "AUTH", token }));
+    };
+    console.log("establishing websocket Connection");
+    websocket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message?.type == "status") {
+        console.log(message.status);
+        return;
+      } else if (message?.type == "notification") {
+        for (const notif of message.notification) {
+          console.log(notif);
+        }
+        sendNotif(message.notification, 0);
+        return;
+      }
+    };
+    websocket.onclose = () => {
+      console.log("Connection closed:", event);
+
+      let delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+      retryConnection(delay);
+    };
+  }
+  establishConnection();
+  alertAudio = new Audio(chrome.runtime.getURL("fearstofathom.mp3"));
 }
+let websocket = null;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "startMonitoring") {
-    chrome.storage.local.get(["intervalTime"], (result) => {
-      intervalSelection = result.intervalTime * 60000;
-      if (result.intervalTime === "0" || !result.intervalTime) {
-        intervalSelection = 60000; // Default to 1 minute if 0 or not set
-      }
-      console.log(
-        `Monitoring interval set to: ${intervalSelection / 1000} seconds.`,
-      );
-      startMonitoring();
-    });
+    startMonitoring();
   } else if (request.action === "stopMonitoring") {
-    stopMonitoring();
+    if (websocket) websocket.close(1000, "User turned monitoring off");
+    monitoringState = false;
+    document.title = "Service Manager";
   }
 });
 
-window.startMonitoring = startMonitoring;
-window.stopMonitoring = stopMonitoring;
+window.addEventListener("beforeunload", () => {
+  if (!websocket) return;
+  try {
+    websocket.onclose = function () {};
+    // close with code and reason where supported
+    websocket.close(1000, "Browser shutting down");
+  } catch (e) {
+    console.warn("Error closing websocket on unload:", e);
+  }
+});

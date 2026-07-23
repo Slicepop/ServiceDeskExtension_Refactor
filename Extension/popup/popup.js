@@ -648,31 +648,28 @@ document.addEventListener("DOMContentLoaded", function () {
 // TicketMonitor
 
 const ticketMonitorCheck = document.querySelector("#enableTicketMonitor");
-const ticketMonitorIntervalSelect = document.querySelector("#intervals");
-// If there is a stored interval value, get it and update dropdown value
-let interval = chrome.storage.local.get(["intervalValue"], (result) => {
-  if (result) {
-    ticketMonitorIntervalSelect.value = result.intervalValue;
-  }
-});
 
 ticketMonitorCheck.addEventListener("change", async (e) => {
   // Get active tab
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  console.log(
+    e.target.checked,
+    tab.title,
+    tab.title == "Service Manager" || tab.title == "👁 Service Manager",
+  );
   // Monitor active
-  if (e.target.checked && tab.title === "Service Manager") {
+  if (
+    e.target.checked &&
+    (tab.url.includes("support.wmed.edu") || tab.title === "👁 Service Manager")
+  ) {
     const prefs = {
       monitoring: "true",
       tabId: tab.id,
-      intervalTime: ticketMonitorIntervalSelect.value,
     };
     chrome.tabs.sendMessage(tab.id, { event: "initializeAudio" });
     chrome.runtime.sendMessage({ event: "onStart", prefs });
     // Monitor inactive
   } else {
-    if (tab.title != "Service Manager") {
-      window.alert("must toggle ticket monitoring on service manager page");
-    }
     const prefs = {
       monitoring: "false",
       tabId: tab.id,
@@ -690,20 +687,4 @@ chrome.storage.local.get(["monitoring"], (result) => {
   }
 
   ticketMonitorCheck.checked = monitoring === "true";
-});
-
-// Watch dropdown value changes and stop monitoring if interval is changed
-ticketMonitorIntervalSelect.addEventListener("change", async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  chrome.storage.local.set({
-    intervalValue: ticketMonitorIntervalSelect.value,
-  });
-  const prefs = {
-    monitoring: "false",
-    tabId: tab.id,
-  };
-
-  chrome.runtime.sendMessage({ event: "onStop", prefs });
-  ticketMonitorCheck.checked = false;
 });

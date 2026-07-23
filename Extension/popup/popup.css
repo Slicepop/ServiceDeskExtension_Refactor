@@ -68,9 +68,10 @@ input {
   color-scheme: dark;
 }
 #ticketMonitor {
-  align-items: center;
   margin-top: 5px;
-  margin-left: 12px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: fit-content;
 }
 #subjectLine {
   margin-top: 10px;

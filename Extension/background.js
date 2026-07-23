@@ -1,6 +1,5 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const { event, prefs } = request;
-  console.log(request);
   switch (event) {
     case "updateRequest":
       console.log("request updates");
@@ -25,13 +24,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       chrome.storage.local.set({
         monitoring: "true",
         tabId: prefs.tabId,
-        intervalTime: prefs.intervalTime,
       });
       chrome.tabs.sendMessage(prefs.tabId, { action: "startMonitoring" });
       break;
-    case "pageRefreshed":
-      chrome.storage.local.set({ monitoring: "false" });
+    case "pageLoad":
+      chrome.storage.local.get(["monitoring", "tabId"], (result) => {
+        const { monitoring, tabId } = result;
+        const isMonitoredTab = sender.tab && sender.tab.id === tabId;
+
+        sendResponse({
+          monitoring: isMonitoredTab ? monitoring : "false",
+          tabId,
+        });
+      });
+
+      return true;
       break;
+
     default:
       break;
   }
