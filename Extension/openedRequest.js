@@ -29,40 +29,52 @@ function runRequestTab() {
     subtree: true,
   });
 }
+let noteDiveOpened = false;
 async function addNoteDivOpened() {
   addNoteDiv = document.querySelector(
     "#requestnote_detail_container > div > div.addnoteWrapper > zsd-addnote",
   );
-  if (!addNoteDiv) return;
-  try {
-    const response = await fetch(
-      "https://support.wmed.edu/LiveTime/services/v1/user/requests/" +
-        RequestID +
-        "/general",
-      {
-        headers: {
-          accept: "application/json, text/plain, */*",
-          "zsd-source": "LT",
+  if (!addNoteDiv) {
+    noteDiveOpened = false;
+    return;
+  }
+  addnoteTrigger();
+  if (!noteDiveOpened)
+    try {
+      noteDiveOpened = true;
+
+      const response = await fetch(
+        "https://support.wmed.edu/LiveTime/services/v1/user/requests/" +
+          RequestID +
+          "/general",
+        {
+          headers: {
+            accept: "application/json, text/plain, */*",
+            "zsd-source": "LT",
+          },
         },
-      },
-    );
-    const data = await response.json();
-    const currStatus = data.status.statusName;
-    if (currStatus == "Open") {
-      var changeRequestCheck = document.querySelector(
-        "#changeRequestStatusCheckBox",
       );
-      if (changeRequestCheck.classList.contains("clicked")) return;
-      changeRequestCheck.classList.add("clicked");
-      changeRequestCheck.click();
-      document.querySelector("div.change-status-wrapper > select").click();
-      var changeRequestSelect = document.querySelector(
-        "div.change-status-wrapper > select",
-      );
-      changeRequestSelect.value = 127;
-      changeRequestSelect.dispatchEvent(new Event("change", { bubbles: true }));
+      const data = await response.json();
+      const currStatus = data.status.statusName;
+      if (currStatus == "Open") {
+        var changeRequestCheck = document.querySelector(
+          "#changeRequestStatusCheckBox",
+        );
+        if (changeRequestCheck.classList.contains("clicked")) return;
+        changeRequestCheck.classList.add("clicked");
+        changeRequestCheck.click();
+        document.querySelector("div.change-status-wrapper > select").click();
+        var changeRequestSelect = document.querySelector(
+          "div.change-status-wrapper > select",
+        );
+        changeRequestSelect.value = 127;
+        changeRequestSelect.dispatchEvent(
+          new Event("change", { bubbles: true }),
+        );
+      }
+    } catch (error) {
+      noteDiveOpened = false;
     }
-  } catch (error) {}
 }
 function updateFavicon() {
   if (document.querySelector("#requestIcon")) return;
@@ -253,4 +265,10 @@ function openNotes() {
     noteDiv.dataset.processed = true;
     noteDiv.click();
   }, 100);
+}
+function addnoteTrigger() {
+  const addNoteBTN = document.querySelector("#createquickrequest");
+  addNoteBTN.addEventListener("click", () => {
+    console.log("ASD");
+  });
 }
