@@ -109,7 +109,6 @@ function sendNotif(message, index) {
   });
 }
 function startMonitoring() {
-  document.title = "👁 Service Manager";
   monitoringState = true;
   let reconnectAttempts = 0;
   function retryConnection(delay) {
@@ -124,6 +123,7 @@ function startMonitoring() {
     websocket = new WebSocket(wsURI);
     websocket.onopen = () => {
       websocket.send(JSON.stringify({ type: "AUTH", token }));
+      document.title = "👁 Service Manager";
     };
     console.log("establishing websocket Connection");
     websocket.onmessage = (event) => {
@@ -141,7 +141,7 @@ function startMonitoring() {
     };
     websocket.onclose = () => {
       console.log("Connection closed:", event);
-
+      document.title = "Service Manager";
       let delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
       retryConnection(delay);
     };

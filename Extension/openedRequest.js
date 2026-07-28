@@ -38,7 +38,6 @@ async function addNoteDivOpened() {
     noteDiveOpened = false;
     return;
   }
-  addnoteTrigger();
   if (!noteDiveOpened)
     try {
       noteDiveOpened = true;
@@ -55,6 +54,8 @@ async function addNoteDivOpened() {
         },
       );
       const data = await response.json();
+
+      setTimeout(addnoteTrigger, 500);
       const currStatus = data.status.statusName;
       if (currStatus == "Open") {
         var changeRequestCheck = document.querySelector(
@@ -85,6 +86,7 @@ function updateFavicon() {
   requestFavicon.href = chrome.runtime.getURL("images/request.ico");
   originalFavicon.parentNode.replaceChild(requestFavicon, originalFavicon);
 }
+let basicTicketInfo;
 async function fetchTitle() {
   const itemID = window.location.href.split("requestId=")[1];
   RequestID = itemID;
@@ -101,6 +103,7 @@ async function fetchTitle() {
       },
     );
     const data = await response.json();
+    basicTicketInfo = data;
     document.title = data.subject;
   } catch (error) {}
 }
@@ -267,8 +270,69 @@ function openNotes() {
   }, 100);
 }
 function addnoteTrigger() {
+  let newestNoteAdded;
+  console.log("running addnoteTrigger");
   const addNoteBTN = document.querySelector("#createquickrequest");
-  addNoteBTN.addEventListener("click", () => {
-    console.log("ASD");
+  addNoteBTN.addEventListener("click", async () => {
+    const isPublicNote = document
+      .querySelector(" div.selection-wrapper.d-flex > div:nth-child(2)")
+      .classList.contains("visibilitySelection");
+    if (isPublicNote) {
+      console.log("ASDASD");
+      const cachedClientId = sessionStorage.getItem("clientId");
+      if (!cachedClientId) {
+        const cachedUserInfo = await fetchUserInfo();
+        sessionStorage.setItem("clientId", cachedUserInfo.clientId);
+        cachedClientId = cachedUserInfo.clientId;
+      }
+      console.log(basicTicketInfo.subject);
+      console.log(cachedClientId);
+      console.log(RequestID);
+      try {
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        const response = await fetch(
+          "https://hephaestus.slicepop.dev/api/notifyUser",
+          {
+            method: "POST",
+            headers: myHeaders,
+            body: JSON.stringify({
+              clientID: cachedClientId,
+              requestID: RequestID,
+              subject: basicTicketInfo.subject,
+            }),
+            redirect: "follow",
+          },
+        );
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
   });
+}
+async function fetchUserInfo() {
+  try {
+    const response = await fetch(
+      `https://support.wmed.edu/LiveTime/services/v1/me`,
+      {
+        headers: {
+          accept: "application/json, text/plain, */*",
+          "zsd-source": "LT",
+        },
+        referrerPolicy: "strict-origin-when-cross-origin",
+        method: "GET",
+        mode: "cors",
+        credentials: "include",
+      },
+    );
+    if (!response.ok)
+      throw new Error(`Failed fetching /me: ${response.status}`);
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Failed to fetch user info:", error);
+    throw error;
+  }
 }
