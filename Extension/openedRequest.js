@@ -273,7 +273,8 @@ function addnoteTrigger() {
   let newestNoteAdded;
   console.log("running addnoteTrigger");
   const addNoteBTN = document.querySelector("#createquickrequest");
-  addNoteBTN.addEventListener("click", async () => {
+  if (!addNoteBTN) return;
+  addNoteBTN.onclick = async () => {
     const isPublicNote = document
       .querySelector(" div.selection-wrapper.d-flex > div:nth-child(2)")
       .classList.contains("visibilitySelection");
@@ -310,7 +311,7 @@ function addnoteTrigger() {
         console.log(error);
       }
     }
-  });
+  };
 }
 async function fetchUserInfo() {
   try {
