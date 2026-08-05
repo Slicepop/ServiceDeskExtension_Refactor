@@ -55,7 +55,34 @@ async function addNoteDivOpened() {
       );
       const data = await response.json();
 
-      setTimeout(addnoteTrigger, 500);
+      setTimeout(() => {
+        if (document.querySelector("#TeamsMessageDiv")) return;
+        const div = document.createElement("div");
+        div.setAttribute("_ngcontent-ng-c535380690", "");
+        div.id = "TeamsMessageDiv";
+        div.className = "form-check fom-check-style pt-1";
+        const teamsMessageInput = document.createElement("input");
+        teamsMessageInput.type = "checkbox";
+        teamsMessageInput.id = "teamsMessage";
+        teamsMessageInput.className = "form-check-input";
+        teamsMessageInput.checked = true;
+        const label = document.createElement("label");
+        label.setAttribute("_ngcontent-ng-c535380690", "");
+        label.htmlFor = "teamsMessage";
+        document
+          .querySelector(
+            "div.col-xl-4.col-lg-4.col-md-12.col-sm-12.col-12.group-options-wrapper",
+          )
+          .append(div);
+        div.append(teamsMessageInput);
+        div.append(label);
+
+        label.textContent = "Notify Customer via Teams Message";
+        addnoteTrigger(teamsMessageInput);
+
+        teamsMessageInput.onchange = async () =>
+          addnoteTrigger(teamsMessageInput);
+      }, 300);
       const currStatus = data.status.statusName;
       if (currStatus == "Open") {
         var changeRequestCheck = document.querySelector(
@@ -269,11 +296,17 @@ function openNotes() {
     noteDiv.click();
   }, 100);
 }
-function addnoteTrigger() {
-  let newestNoteAdded;
+function addnoteTrigger(teamsMessageInput) {
   console.log("running addnoteTrigger");
   const addNoteBTN = document.querySelector("#createquickrequest");
   if (!addNoteBTN) return;
+  if (!teamsMessageInput.checked) {
+    addNoteBTN.onclick = async () => {
+      console.log("do nothing");
+    };
+    return;
+  }
+  let newestNoteAdded;
   addNoteBTN.onclick = async () => {
     const isPublicNote = document
       .querySelector(" div.selection-wrapper.d-flex > div:nth-child(2)")
