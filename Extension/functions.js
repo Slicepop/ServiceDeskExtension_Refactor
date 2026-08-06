@@ -122,10 +122,16 @@ function runInitialSetup() {
     const navRequestBTN = document.querySelector(
       "#zsd_navbar_menus > ul.navbar-nav.mr-auto > li:nth-child(2) > a",
     );
-
-    if (!navRequestBTN) return;
+    const reportBTN = document.querySelector(
+      "#zsd_navbar_menus > ul.navbar-nav.mr-auto > li:nth-child(8) > a",
+    );
+    if (!navRequestBTN || !reportBTN) return;
     navRequestBTN.href =
       "https://support.wmed.edu/LiveTime/WebObjects/LiveTime";
+    const reportURL =
+      "https://support.wmed.edu/LiveTime/WebObjects/LiveTime/reports";
+    if (window.location.href == reportURL) return;
+    reportBTN.href = reportURL;
   }
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "refreshPage") {

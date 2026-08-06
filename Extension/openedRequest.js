@@ -312,15 +312,18 @@ function addnoteTrigger(teamsMessageInput) {
       .querySelector(" div.selection-wrapper.d-flex > div:nth-child(2)")
       .classList.contains("visibilitySelection");
     if (isPublicNote) {
-      console.log("ASDASD");
-      const cachedClientId = sessionStorage.getItem("clientId");
-      if (!cachedClientId) {
+      var cachedClientId = sessionStorage.getItem("clientId");
+      var cachedClientEmail = sessionStorage.getItem("clientEmail");
+      if (!cachedClientId || !cachedClientEmail) {
         const cachedUserInfo = await fetchUserInfo();
         sessionStorage.setItem("clientId", cachedUserInfo.clientId);
+        sessionStorage.setItem("clientEmail", cachedUserInfo.email);
         cachedClientId = cachedUserInfo.clientId;
+        cachedClientEmail = cachedUserInfo.email;
       }
       console.log(basicTicketInfo.subject);
       console.log(cachedClientId);
+      console.log(cachedClientEmail);
       console.log(RequestID);
       try {
         const myHeaders = new Headers();
@@ -332,6 +335,7 @@ function addnoteTrigger(teamsMessageInput) {
             headers: myHeaders,
             body: JSON.stringify({
               clientID: cachedClientId,
+              techEmail: cachedClientEmail,
               requestID: RequestID,
               subject: basicTicketInfo.subject,
             }),
