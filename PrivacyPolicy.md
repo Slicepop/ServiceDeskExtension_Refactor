@@ -1,6 +1,6 @@
 # Privacy Policy for Hephaestus
 
-**Effective Date:** August 10, 2026
+**Effective Date:** August 11, 2026
 
 Western Michigan University Homer Stryker M.D. School of Medicine ("WMed," "we," "our," or "us") developed **Hephaestus** ("the extension") to improve the WMed Service Desk experience for authorized IT technicians. This privacy policy explains what information the extension handles, how that information is used, and where it may be transmitted.
 
@@ -11,6 +11,12 @@ Hephaestus may handle the following categories of information:
 ### Authentication and Identifiers
 
 Hephaestus uses Firebase Anonymous Authentication to provide identity for extension functionality. Firebase generates an anonymous identifier for the technician. The extension does not use this anonymous identifier to determine the technician's name, password, or other personal identity information.
+
+### Passwords and Authentication Credentials
+
+Hephaestus does **not** collect, store, or share users' passwords or Service Desk authentication credentials. The extension does not transmit users' Service Desk passwords to Hephaestus backend services, Firebase, or other third-party services.
+
+Authentication to the WMed Service Desk is handled by the WMed Service Desk itself. Hephaestus may process an anonymous Firebase authentication identifier for functionality such as technician presence, but this identifier is not a password or Service Desk credential.
 
 ### Service Desk Information
 
@@ -108,7 +114,7 @@ For questions about this privacy policy or Hephaestus's handling of information,
 
 **Western Michigan University Homer Stryker M.D. School of Medicine**  
 **Information Technology / Service Desk**  
-Support@wmed.edu
+[Support@wmed.edu](mailto:Support@wmed.edu)
 
 ## 9. Changes to This Policy
 
